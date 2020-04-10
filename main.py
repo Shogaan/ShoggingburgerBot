@@ -1,4 +1,7 @@
+from discord import Activity, ActivityType
 from discord.ext import commands
+
+import asyncio
 
 from guild_logic.guild_events import GuildEvents
 from glue import Profile, Guild, Chat, Music, System
@@ -7,11 +10,13 @@ from help_command import HelpCommandCustom
 
 from db_logic import DatabaseProcessor
 from constants import TOKEN, PREFIX
+from constants import ACTIVITIES
 from utils import close_database
 
 class Bot(commands.Bot):
     def __init__(self):
         super(Bot, self).__init__(command_prefix=PREFIX, help_command=HelpCommandCustom())
+        self.activity = Activity(name="Starting", type=ActivityType.playing)
 
         self.guild_events = GuildEvents()
 
@@ -37,6 +42,8 @@ class Bot(commands.Bot):
             if not guild in guilds:
                 db_p._remove_row_guild_settings(guild)
 
+        self.loop.create_task(self.dynamic_activity())
+
         print("Bot on-line")
 
     async def on_disconnect(self):
@@ -51,6 +58,14 @@ class Bot(commands.Bot):
         print("Done")
         exit(0)
 
+    async def dynamic_activity(self):
+        await self.wait_until_ready()
+
+        while True:
+            for activity in ACTIVITIES:
+                await self.change_presence(activity=activity)
+                await asyncio.sleep(30)
+
     # ------- Guilds ----------
     async def on_guild_join(self, guild):
         await self.guild_events.on_bot_join(guild)
@@ -59,7 +74,7 @@ class Bot(commands.Bot):
         await self.guild_events.on_bot_leave(guild)
 
     async def on_member_join(self, member):
-        await self.guild_events.on_mamber_join(member)
+        await self.guild_events.on_member_join(member)
     # ------- Guilds ----------
 
 
