@@ -1,116 +1,67 @@
-import discord
-
 from discord.ext import commands
 
-from chat_logic.chat_commands import ChatCommands
-from guild_logic.guild_commands import GuildCommands
 from guild_logic.guild_events import GuildEvents
-from music_logic.music_main import MusicCommands
-from profile_logic.profile_commands import ProfileCommands
+from glue import Profile, Guild, Chat, Music, System
+
 from help_command import HelpCommandCustom
 
+from db_logic import DatabaseProcessor
 from constants import TOKEN, PREFIX
 from utils import close_database
 
-import os
+class Bot(commands.Bot):
+    def __init__(self):
+        super(Bot, self).__init__(command_prefix=PREFIX, help_command=HelpCommandCustom())
 
-bot = commands.Bot(command_prefix=PREFIX, help_command=HelpCommandCustom())
+        self.guild_events = GuildEvents()
 
-# --------- Locale ----------
+        self.add_cog(Profile())
+        self.add_cog(Guild())
+        self.add_cog(Chat())
+        self.add_cog(Music(self))
+        self.add_cog(System(self))
 
+    async def on_ready(self):
+        db_p = DatabaseProcessor()
 
+        guilds = [i.id for i in self.guilds]
+        wr_guilds = [i[0] for i in db_p._get_guilds()]
 
-# --------- Locale ----------
+        for guild in guilds:
+            if not guild in wr_guilds:
+                db_p._create_row_guild_settings(guild)
 
+        wr_guilds = [i[0] for i in db_p._get_guilds()]
 
-# --------- Commands --------
+        for guild in wr_guilds:
+            if not guild in guilds:
+                db_p._remove_row_guild_settings(guild)
 
-## -------- Profile ---------
-@bot.command(help="Return mentioned user's avatar")
-async def avatar(ctx):
-    await ProfileCommands(ctx).send_avatar()
+        print("Bot on-line")
 
+    async def on_disconnect(self):
+        print("Shutting down...")
+        close_database()
+        print("Done")
+        exit(0)
 
-@bot.command(help="Return information about mentioned member")
-async def member_info(ctx):
-    await ProfileCommands(ctx).send_member_info()
-## -------- Profile ---------
+    async def on_resume(self):
+        print("Shutting down...")
+        close_database()
+        print("Done")
+        exit(0)
 
-## -------- Guild -----------
-@bot.command(help="Return information about current server")
-async def server_info(ctx):
-    await GuildCommands(ctx).send_guild_info()
+    # ------- Guilds ----------
+    async def on_guild_join(self, guild):
+        await self.guild_events.on_bot_join(guild)
 
-@bot.command(help='-titile- main text\n-Title from several words- Greeting')
-async def set_greeting(ctx, *args):
-    await GuildCommands(ctx).set_greeting_text(args)
+    async def on_guild_remove(self, guild):
+        await self.guild_events.on_bot_leave(guild)
 
-@bot.command(help="Enter new prefix. Max length is 10 symbols")
-async def set_prefix(ctx, *new_prefix):
-    await GuildCommands(ctx).set_prefix(new_prefix)
-## -------- Guild -----------
-
-## -------- Chat ------------
-@bot.command(help="Return link for inviting bot to another server")
-async def get_link(ctx):
-    await ChatCommands(ctx).send_link()
-
-## -------- Chat ------------
-
-## -------- Music -----------
-# TODO: Later automate this
-@bot.command()
-async def connect(ctx):
-    await MusicCommands(ctx).connect()
-
-@bot.command()
-async def leave(ctx):
-    await MusicCommands(ctx).disconnect()
-## -------- Music -----------
-
-@bot.command(hidden=True)
-async def ping(ctx):
-    await ctx.send(str(round(bot.latency * 10 ** 3)) + "ms")
-
-# --------- Commands --------
+    async def on_member_join(self, member):
+        await self.guild_events.on_mamber_join(member)
+    # ------- Guilds ----------
 
 
-# --------- Events ----------
-
-@bot.event
-async def on_ready():
-    print("Bot on-line")
-
-@bot.event
-async def on_disconnect():
-    print("\nShutting down...")
-    close_database()
-    print("Done")
-    exit(0)
-
-@bot.event
-async def on_resumed():
-    print("\nShutting down...")
-    close_database()
-    print("Done")
-    exit(0)
-
-## -------- Guild -----------
-@bot.event
-async def on_guild_join(guild):
-    await GuildEvents().on_bot_join(guild)
-
-@bot.event
-async def on_guild_remove(guild):
-    await GuildEvents().on_bot_leave(guild)
-
-@bot.event
-async def on_member_join(member):
-    await GuildEvents().on_member_join(member)
-
-## -------- Guild -----------
-
-# --------- Events ----------
-
-bot.run(TOKEN)
+Bot().run(TOKEN)
 

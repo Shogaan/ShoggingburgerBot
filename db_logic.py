@@ -8,6 +8,12 @@ class DatabaseProcessor:
         self.db = sqlite3.connect('global.db')
         self.shell = self.db.cursor()
 
+        self.shell.execute("create table if not exists guild_settings("
+                "guild_id integer not null primary key,"
+                "greeting text);")
+
+        self.db.commit()
+
     def _create_row_guild_settings(self, guild_id):
         self.shell.execute("insert into guild_settings(guild_id, greeting) " \
                 "values(?, ?);",
@@ -19,6 +25,11 @@ class DatabaseProcessor:
                 (guild_id,))
 
         return self.shell.fetchone()[0]
+
+    def _get_guilds(self):
+        self.shell.execute("select guild_id from guild_settings;")
+
+        return self.shell.fetchall()
 
     def _remove_row_guild_settings(self, guild_id):
         self.shell.execute("delete from guild_settings where guild_id=?;",

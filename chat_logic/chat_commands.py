@@ -8,4 +8,5 @@ class ChatCommands:
         self.er_emb = ERROR_EMB
 
     async def send_link(self):
-        await self.ctx.send("https://discordapp.com/oauth2/authorize?client_id=568532677326536704&scope=bot&permissions=8")
+        await self.ctx.send(JOIN_LINK.format(self.ctx.bot.user.id))
+
