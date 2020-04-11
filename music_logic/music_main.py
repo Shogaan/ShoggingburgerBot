@@ -29,7 +29,7 @@ class CustomPlayer(wavelink.Player):
                 track = await self.queue.get()
 
         except asyncio.TimeoutError:
-            return self.teardown()
+            return await self.teardown()
 
         await self.play(track)
         self.waiting = False
