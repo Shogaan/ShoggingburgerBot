@@ -50,6 +50,10 @@ class Chat(commands.Cog, name="Chat"):
     async def get_link(self, ctx):
         await ChatCommands(ctx).send_link()
 
+    @commands.command(help="Sending invite to lamp pub")
+    async def to_pub(self, ctx):
+        await ChatCommands(ctx).send_invite()
+
 ## -------- Chat ------------
 
 ## -------- Music -----------

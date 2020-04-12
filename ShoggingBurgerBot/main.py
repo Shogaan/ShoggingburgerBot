@@ -46,12 +46,6 @@ class Bot(commands.Bot):
 
         print("Bot on-line")
 
-    async def on_disconnect(self):
-        print("Shutting down...")
-        close_database()
-        print("Done")
-        exit(0)
-
     async def on_resume(self):
         print("Shutting down...")
         close_database()
