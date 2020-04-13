@@ -11,6 +11,7 @@ from help_command import HelpCommandCustom
 from db_logic import DatabaseProcessor
 from constants import TOKEN, PREFIX
 from constants import ACTIVITIES
+from constants import ERROR_EMB
 from utils import close_database
 
 class Bot(commands.Bot):
@@ -52,13 +53,22 @@ class Bot(commands.Bot):
         print("Done")
         exit(0)
 
+    async def on_command_error(self, ctx, err):
+        emb = ERROR_EMB.copy()
+
+        err = str(err) if str(err)[-1] != '.' else str(err)[:-1]
+
+        emb.title = "**ERROR!** " + err +"!"
+
+        await ctx.send(embed=emb)
+
     async def dynamic_activity(self):
         await self.wait_until_ready()
 
         while True:
             for activity in ACTIVITIES:
                 await self.change_presence(activity=activity)
-                await asyncio.sleep(30)
+                await asyncio.sleep(120)
 
     # ------- Guilds ----------
     async def on_guild_join(self, guild):

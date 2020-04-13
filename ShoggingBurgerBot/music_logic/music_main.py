@@ -6,6 +6,8 @@ import wavelink
 from discord.ext import commands
 from typing import Union
 
+from errors import NotInVoice, NoneTracksFound, IncorrectVolume
+
 URL_TEMPL = re.compile('https?:\/\/(?:www\.)?.+')
 
 
@@ -71,10 +73,7 @@ class MusicCommands:
 
     async def connect(self, ctx):
         if not ctx.author.voice:
-            self.er_emb.title = "**ERROR!** You must be in voice channel!"
-
-            await self.ctx.send(embed=self.er_emb)
-            return
+            raise NotInVoice()
 
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
@@ -101,7 +100,7 @@ class MusicCommands:
         tracks = await self.bot.wavelink.get_tracks(f'{query}')
 
         if not tracks:
-            return await ctx.send("Not tracks")
+            raise NoneTracksFound()
 
         if isinstance(tracks, wavelink.TrackPlaylist):
             for track in tracks.tracks:
@@ -147,7 +146,7 @@ class MusicCommands:
         value = int(value)
 
         if not 0 < value < 101:
-            return
+            raise IncorrectVolume()
 
         await player.set_volume(value)
 

@@ -9,12 +9,6 @@ class GuildCommands:
         self.er_emb = ERROR_EMB
 
     async def send_guild_info(self):
-        if not self.ctx.guild:
-            self.er_emb.title = "**ERROR!** This command works **only** on server!"
-
-            await self.ctx.send(embed=self.er_emb)
-            return
-
         guild = self.ctx.guild
         emb = BASIC_EMB.copy()
 
@@ -30,12 +24,6 @@ class GuildCommands:
         await self.ctx.send(embed=emb)
 
     async def set_greeting_text(self, args):
-        if not self.ctx.guild:
-            self.er_emb.title = "**ERROR!** This command works **only** on server!"
-
-            await self.ctx.send(embed=self.er_emb)
-            return
-
         title = ""
         description = ""
         is_title = True
