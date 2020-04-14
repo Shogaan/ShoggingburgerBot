@@ -1,4 +1,4 @@
-from constants import BASIC_EMB, ERROR_EMB
+from constants import BASIC_EMB
 from errors import NoUserSpec
 from utils import to_column_string
 

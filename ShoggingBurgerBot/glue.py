@@ -43,6 +43,7 @@ class Guild(commands.Cog, name="Server"):
         await GuildCommands(ctx).send_guild_info()
 
     @commands.guild_only()
+    @commands.has_permitions(administrator=True)
     @commands.command(help='-titile- main text\n-Title from several words- Greeting')
     async def set_greeting(self, ctx, *args):
         await GuildCommands(ctx).set_greeting_text(args)

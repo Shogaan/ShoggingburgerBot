@@ -39,7 +39,7 @@ class CustomPlayer(wavelink.Player):
 
     async def teardown(self):
         try:
-            self.destroy()
+            await self.destroy()
 
         except KeyError:
             pass

@@ -1,12 +1,10 @@
-from constants import BASIC_EMB, ERROR_EMB
+from constants import BASIC_EMB
 from db_logic import DatabaseProcessor
 from utils import to_column_string
 
 class GuildCommands:
     def __init__(self, ctx):
         self.ctx = ctx
-
-        self.er_emb = ERROR_EMB
 
     async def send_guild_info(self):
         guild = self.ctx.guild
