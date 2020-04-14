@@ -19,6 +19,8 @@ class GuildCommands:
         emb.add_field(name="Text channels", value=to_column_string(guild.text_channels))
         emb.add_field(name="Voice channels", value=to_column_string(guild.voice_channels))
 
+        await self.ctx.message.delete(delay=2)
+
         await self.ctx.send(embed=emb)
 
     async def set_greeting_text(self, args):
@@ -48,7 +50,9 @@ class GuildCommands:
 
         DatabaseProcessor()._set_greeting(self.ctx.guild.id, title + "; " + description)
 
+        await self.ctx.message.delete(delay=3)
+
         emb = BASIC_EMB.copy()
         emb.title = "Done"
-        await self.ctx.send(embed=emb)
+        await self.ctx.send(embed=emb, delete_after=5)
 
