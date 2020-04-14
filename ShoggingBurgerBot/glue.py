@@ -117,7 +117,8 @@ class System(commands.Cog, name="System"):
     async def shut_down(self, ctx):
         for guild in ctx.bot.guilds:
             channel = guild.system_channel if guild.system_channel else guild.text_channels[0]
-            await channel.send("@everyone! Bot will shut down in 2 minutes!")
+            await channel.send("@everyone! Bot will shut down in 2 minutes!",
+                                delete_after=150)
 
         await asyncio.sleep(120)
 
