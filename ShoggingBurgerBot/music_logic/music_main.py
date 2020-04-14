@@ -97,7 +97,10 @@ class MusicCommands:
         await ctx.message.delete(delay=2)
 
         if not URL_TEMPL.match(query):
-            query = f"ytsearch:{query}"
+            if ctx.command.name == "soundcloud":
+                query=f"scsearch:{query}"
+            else:
+                query = f"ytsearch:{query}"
 
         tracks = await self.bot.wavelink.get_tracks(f'{query}')
 
@@ -138,13 +141,13 @@ class MusicCommands:
         if player.is_playing:
             emb = BASIC_EMB.copy()
             emb.title = "Pausing..."
-            await ctx.send(embed=emb)
+            await ctx.send(embed=emb, delete_after=2)
             await player.set_pause(True)
 
         else:
             emb = DASIC_EMB.copy()
             emb.title = "starting..."
-            await ctx.send(embed=emb)
+            await ctx.send(embed=emb, delete_after=2)
             await player.set_pause(False)
 
     async def skip(self, ctx):
@@ -176,5 +179,5 @@ class MusicCommands:
         emb.title = "Volume is {}".format(value)
         await ctx.send(embed=emb)
 
-        await player.set_volume(value)
+        await player.set_volume(value, delete_after=2)
 

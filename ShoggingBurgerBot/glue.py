@@ -78,6 +78,12 @@ class Music(commands.Cog, name="Music"):
         await self.music.play(ctx, args)
 
     @commands.guild_only()
+    @commands.command(name="soundcloud",
+                      aliases=['sc',])
+    async def sc(self, ctx, *, args=""):
+        await self.music.play(ctx, args)
+
+    @commands.guild_only()
     @commands.command(aliases=['pause', 'resume', 'pr', 'rp',])
     async def pause_resume(self, ctx):
         await self.music.pause_resume(ctx)
