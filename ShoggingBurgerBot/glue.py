@@ -28,7 +28,6 @@ class Profile(commands.Cog, name="Profile"):
     async def avatar(self, ctx):
         await ProfileCommands(ctx).send_avatar()
 
-
     @commands.guild_only()
     @commands.command(help="Return information about mentioned member")
     async def member_info(self, ctx):

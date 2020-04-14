@@ -7,6 +7,7 @@ from discord.ext import commands
 from typing import Union
 
 from errors import NotInVoice, NoneTracksFound, IncorrectVolume
+from constants import BASIC_EMB
 
 URL_TEMPL = re.compile('https?:\/\/(?:www\.)?.+')
 
@@ -48,7 +49,6 @@ class CustomPlayer(wavelink.Player):
 class MusicCommands:
     def __init__(self, bot):
         self.bot = bot
-        self.controllers = {}
 
         if not hasattr(bot, "wavelink"):
             self.bot.wavelink = wavelink.Client(self.bot)
@@ -94,6 +94,8 @@ class MusicCommands:
         if not player.is_connected:
             await self.connect(ctx)
 
+        await ctx.message.delete(delay=2)
+
         if not URL_TEMPL.match(query):
             query = f"ytsearch:{query}"
 
@@ -106,13 +108,20 @@ class MusicCommands:
             for track in tracks.tracks:
                 await player.queue.put(track)
 
-            await ctx.send("Added playlist {}".format(tracks.data["playlistInfo"]["name"]))
+            emb = BASIC_EMB.copy()
+            emb.title = ":notes: Playlist added :notes:"
+            emb.description = tracks.data["playlistInfo"]["name"]
+            await ctx.send(embed=emb)
 
         else:
             track = tracks[0]
 
-            await ctx.send("Added {}".format(track.title))
             await player.queue.put(track)
+
+            emb = BASIC_EMB.copy()
+            emb.title = ":notes: Track added :notes:"
+            emb.description = track.title
+            await ctx.send(embed=emb)
 
         if not player.is_playing:
             await player.do_next()
@@ -124,10 +133,18 @@ class MusicCommands:
         if not player.is_connected:
             return
 
+        await ctx.message.delete(delay=2)
+
         if player.is_playing:
+            emb = BASIC_EMB.copy()
+            emb.title = "Pausing..."
+            await ctx.send(embed=emb)
             await player.set_pause(True)
 
         else:
+            emb = DASIC_EMB.copy()
+            emb.title = "starting..."
+            await ctx.send(embed=emb)
             await player.set_pause(False)
 
     async def skip(self, ctx):
@@ -137,6 +154,11 @@ class MusicCommands:
         if not player.is_connected:
             return
 
+        await ctx.message.delete(delay=2)
+
+        emb = BASIC_EMB.copy()
+        emb.title = "Skipping..."
+        await ctx.send(embed=emb)
         await player.stop()
 
     async def set_volume(self, ctx, value):
@@ -145,8 +167,14 @@ class MusicCommands:
 
         value = int(value)
 
+        await ctx.message.delete(delay=2)
+
         if not 0 < value < 101:
             raise IncorrectVolume()
+
+        emb = BASIC_EMB.copy()
+        emb.title = "Volume is {}".format(value)
+        await ctx.send(embed=emb)
 
         await player.set_volume(value)
 
