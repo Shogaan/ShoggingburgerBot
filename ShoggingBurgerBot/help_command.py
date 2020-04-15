@@ -14,8 +14,6 @@ class HelpCommandCustom(HelpCommand):
 
         if command is None:
             emb.title = f"Hi, {ctx.message.author.name}! It's a help command. The prefix is '//'"
-            # emb.add_field(name="Profile", value="avatar `@mention`\nmember_info `@mention`")
-            # get_bot_mapping
             cogs = self.get_bot_mapping()
             for cog in cogs:
                 if cog == None or cog.qualified_name == "System":
