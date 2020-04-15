@@ -1,6 +1,6 @@
 from discord.ext.commands import HelpCommand
 
-from constants import HELP_EMB
+from constants import HELP_EMB, PREFIX
 
 from utils import to_column_string
 
@@ -23,6 +23,10 @@ class HelpCommandCustom(HelpCommand):
                 value = to_column_string(cogs[cog])
                 emb.add_field(name=name, value=value)
 
+            emb.set_footer(
+                    text=f"To see more information ablout command type {PREFIX}help",
+                    icon_url="https://i.imgur.com/83bdZJE.jpg")
+
             await ctx.message.author.send(embed=emb)
 
     async def send_command_help(self, command):
@@ -30,7 +34,9 @@ class HelpCommandCustom(HelpCommand):
 
         emb.title = command.name
         emb.description = command.help
-        value = '\n'.join(command.aliases)
-        emb.add_field(name="Aliases", value=value)
+        if command.aliases:
+            value = '\n'.join(command.aliases)
+            emb.add_field(name="Aliases", value=value)
+
         await self.context.send(embed=emb)
 
