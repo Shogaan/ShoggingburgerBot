@@ -1,5 +1,6 @@
 from discord.ext.commands import CommandError
 
+
 class NoUserSpec(CommandError):
     def __str__(self):
         return "At least one user must be specified"

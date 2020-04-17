@@ -6,8 +6,9 @@ import wavelink
 from discord.ext import commands
 from typing import Union
 
+from db_logic import DatabaseProcessor
 from errors import NotInVoice, NoneTracksFound, IncorrectVolume
-from constants import BASIC_EMB
+from constants import BASIC_EMB, DEFAULT_VOLUME, ERROR_EMB
 
 URL_TEMPL = re.compile('https?:\/\/(?:www\.)?.+')
 
@@ -37,7 +38,6 @@ class CustomPlayer(wavelink.Player):
         await self.play(track)
         self.waiting = False
 
-
     async def teardown(self):
         try:
             await self.destroy()
@@ -49,6 +49,7 @@ class CustomPlayer(wavelink.Player):
 class MusicCommands:
     def __init__(self, bot):
         self.bot = bot
+        self.db_proc = DatabaseProcessor()
 
         if not hasattr(bot, "wavelink"):
             self.bot.wavelink = wavelink.Client(self.bot)
@@ -68,8 +69,26 @@ class MusicCommands:
         node.set_hook(self.node_event_hook)
 
     async def node_event_hook(self, event):
-        if isinstance(event, (wavelink.TrackStuck, wavelink.TrackException, wavelink.TrackEnd)):
+        if isinstance(event, wavelink.TrackEnd):# (wavelink.TrackStuck, wavelink.TrackException, wavelink.TrackEnd)):
             await event.player.do_next()
+
+        elif isinstance(event, (wavelink.TrackException, wavelink.TrackStuck)):
+            emb = ERROR_EMB.copy()
+            track = event.track
+            player = event.player
+
+            channel_id = self.db_proc._get_channel(player.guild_id)
+            channel = self.bot.get_channel(channel_id)
+
+            if isinstance(track, str): # indicates that track is stream
+                emb.title = "**ERROR!** Streams couldn't be played! Skipping..."
+
+            else:
+                emb.title = "**ERROR!** {} is brocken. Try again or try another link! Skipping...".format(track.title)
+
+            await channel.send(embed=emb)
+            await player.stop()
+
 
     async def connect(self, ctx):
         if not ctx.author.voice:
@@ -77,6 +96,9 @@ class MusicCommands:
 
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
+
+        await player.set_volume(DEFAULT_VOLUME)
+
         await player.connect(ctx.author.voice.channel.id)
 
     async def disconnect(self, ctx):
@@ -90,6 +112,12 @@ class MusicCommands:
     async def play(self, ctx, query):
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
+
+        if not self.db_proc._is_channel_in(ctx.guild.id):
+            self.db_proc._create_row_last_channel(ctx.guild.id, ctx.channel.id)
+
+        else:
+            self.db_proc._update_channel(ctx.guild.id, ctx.channel.id)
 
         if not player.is_connected:
             await self.connect(ctx)
@@ -122,7 +150,7 @@ class MusicCommands:
             await player.queue.put(track)
 
             emb = BASIC_EMB.copy()
-            emb.title = ":notes: Track added :notes:"
+            emb.title = ":musical_note: Track added :musical_note:"
             emb.description = track.title
             await ctx.send(embed=emb)
 
@@ -138,15 +166,15 @@ class MusicCommands:
 
         await ctx.message.delete(delay=2)
 
-        if player.is_playing:
+        if not player.is_paused:
             emb = BASIC_EMB.copy()
             emb.title = "Pausing..."
             await ctx.send(embed=emb, delete_after=2)
             await player.set_pause(True)
 
         else:
-            emb = DASIC_EMB.copy()
-            emb.title = "starting..."
+            emb = BASIC_EMB.copy()
+            emb.title = "Starting..."
             await ctx.send(embed=emb, delete_after=2)
             await player.set_pause(False)
 
@@ -161,7 +189,7 @@ class MusicCommands:
 
         emb = BASIC_EMB.copy()
         emb.title = "Skipping..."
-        await ctx.send(embed=emb)
+        await ctx.send(embed=emb, delete_after=2)
         await player.stop()
 
     async def set_volume(self, ctx, value):
@@ -177,7 +205,7 @@ class MusicCommands:
 
         emb = BASIC_EMB.copy()
         emb.title = "Volume is {}".format(value)
-        await ctx.send(embed=emb)
+        await ctx.send(embed=emb, delete_after=2)
 
-        await player.set_volume(value, delete_after=2)
+        await player.set_volume(value)
 

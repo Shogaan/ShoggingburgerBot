@@ -14,6 +14,7 @@ from constants import ACTIVITIES
 from constants import ERROR_EMB
 from utils import close_database
 
+
 class Bot(commands.Bot):
     def __init__(self):
         super(Bot, self).__init__(command_prefix=PREFIX, help_command=HelpCommandCustom())
@@ -40,7 +41,7 @@ class Bot(commands.Bot):
         wr_guilds = [i[0] for i in db_p._get_guilds()]
 
         for guild in wr_guilds:
-            if not guild in guilds:
+            if guild not in guilds:
                 db_p._remove_row_guild_settings(guild)
 
         self.loop.create_task(self.dynamic_activity())
@@ -58,7 +59,7 @@ class Bot(commands.Bot):
 
         err = str(err) if str(err)[-1] != '.' else str(err)[:-1]
 
-        emb.title = "**ERROR!** " + err +"!"
+        emb.title = "**ERROR!** " + err + "!"
 
         await ctx.send(embed=emb)
 

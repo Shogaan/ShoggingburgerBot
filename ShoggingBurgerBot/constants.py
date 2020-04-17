@@ -27,3 +27,4 @@ ACTIVITIES = [
         Activity(type=ActivityType.playing, name="Crying for //help")
         ]
 
+DEFAULT_VOLUME = 30
