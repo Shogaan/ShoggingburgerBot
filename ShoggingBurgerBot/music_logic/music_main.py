@@ -138,7 +138,7 @@ class MusicCommands:
             emb = BASIC_EMB.copy()
             emb.title = ":notes: Playlist added :notes:"
             emb.description = tracks.data["playlistInfo"]["name"]
-            await ctx.send(embed=emb)
+            emb.url = query if URL_TEMPL.match(query) else None
 
         else:
             track = tracks[0]
@@ -148,7 +148,14 @@ class MusicCommands:
             emb = BASIC_EMB.copy()
             emb.title = ":musical_note: Track added :musical_note:"
             emb.description = track.title
-            await ctx.send(embed=emb)
+            emb.url = track.uri
+
+        emb.set_footer(
+            text="Requested by {}".format(ctx.author),
+            icon_url=ctx.author.avatar_url
+        )
+
+        await ctx.send(embed=emb)
 
         if not player.is_playing:
             await player.do_next()
