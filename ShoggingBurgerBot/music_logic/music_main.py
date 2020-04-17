@@ -64,7 +64,7 @@ class MusicCommands:
                                                      rest_uri='http://127.0.0.1:2333',
                                                      password='youshallnotpass',
                                                      identifier='TEST',
-                                                     region='russia')
+                                                     region='eu_central')
 
         node.set_hook(self.node_event_hook)
 
