@@ -80,11 +80,7 @@ class MusicCommands:
             channel_id = self.db_proc._get_channel(player.guild_id)
             channel = self.bot.get_channel(channel_id)
 
-            if isinstance(track, str): # indicates that track is stream
-                emb.title = "**ERROR!** Streams couldn't be played! Skipping..."
-
-            else:
-                emb.title = "**ERROR!** {} is brocken. Try again or try another link! Skipping...".format(track.title)
+            emb.title = "**ERROR!** Song couldn't be played!(Streams couldn't be played at all) Skipping..."
 
             await channel.send(embed=emb)
             await player.stop()
