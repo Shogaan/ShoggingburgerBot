@@ -23,7 +23,7 @@ PUB_LINK = "https://discord.gg/5SEM92b"
 ACTIVITIES = [
         Activity(type=ActivityType.listening, name="your messages"),
         Activity(type=ActivityType.playing, name="with DNA"),
-        Activity(type=ActivityType.watching, name="at awsome loaf"),
+        Activity(type=ActivityType.watching, name="at awesome loaf"),
         Activity(type=ActivityType.playing, name="Crying for //help")
         ]
 
