@@ -1,16 +1,27 @@
 import asyncio
 import async_timeout
+import datetime
 import re
 import wavelink
 
 from discord.ext import commands
-from typing import Union
+from typing import Dict, Union
 
 from db_logic import DatabaseProcessor
 from errors import NotInVoice, NoneTracksFound, IncorrectVolume
 from constants import BASIC_EMB, DEFAULT_VOLUME, ERROR_EMB
 
 URL_TEMPL = re.compile('https?:\/\/(?:www\.)?.+')
+
+db_proc = DatabaseProcessor()
+
+
+class CurrentSong(Dict):
+    guild_id: int
+    song: wavelink.Track
+
+
+current_song = CurrentSong()
 
 
 class CustomPlayer(wavelink.Player):
@@ -39,6 +50,8 @@ class CustomPlayer(wavelink.Player):
         self.waiting = False
 
     async def teardown(self):
+        current_song.pop(self.guild_id)
+
         try:
             await self.destroy()
 
@@ -49,7 +62,6 @@ class CustomPlayer(wavelink.Player):
 class MusicCommands:
     def __init__(self, bot):
         self.bot = bot
-        self.db_proc = DatabaseProcessor()
 
         if not hasattr(bot, "wavelink"):
             self.bot.wavelink = wavelink.Client(self.bot)
@@ -77,7 +89,7 @@ class MusicCommands:
             track = event.track
             player = event.player
 
-            channel_id = self.db_proc._get_channel(player.guild_id)
+            channel_id = db_proc._get_channel(player.guild_id)
             channel = self.bot.get_channel(channel_id)
 
             emb.title = "**ERROR!** Song couldn't be played!(Streams couldn't be played at all) Skipping..."
@@ -100,20 +112,39 @@ class MusicCommands:
     async def disconnect(self, ctx):
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
+
         try:
             await player.destroy()
         except KeyError:
             pass
 
+    async def now_playing(self, ctx):
+        player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
+                                              cls=CustomPlayer)
+
+        if not player.is_connected:
+            return
+
+        track = current_song[ctx.guild.id]
+
+        emb = BASIC_EMB.copy()
+        emb.title = ":musical_note: Now playing :musical_note:"
+        to_end = str(datetime.timedelta(milliseconds=int(track.length - player.position)))[:-7]
+        emb.description = "[{}]({})\nTo end {}".format(track.title, track.uri, to_end)
+
+        await ctx.message.delete()
+        await ctx.send(embed=emb, delete_after=5)
+
+
     async def play(self, ctx, query):
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
 
-        if not self.db_proc._is_channel_in(ctx.guild.id):
-            self.db_proc._create_row_last_channel(ctx.guild.id, ctx.channel.id)
+        if not db_proc._is_channel_in(ctx.guild.id):
+            db_proc._create_row_last_channel(ctx.guild.id, ctx.channel.id)
 
         else:
-            self.db_proc._update_channel(ctx.guild.id, ctx.channel.id)
+            db_proc._update_channel(ctx.guild.id, ctx.channel.id)
 
         if not player.is_connected:
             await self.connect(ctx)

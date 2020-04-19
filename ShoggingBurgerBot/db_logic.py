@@ -10,7 +10,8 @@ class DatabaseProcessor:
 
         self.shell.execute("create table if not exists guild_settings("
                            "guild_id integer not null primary key,"
-                           "greeting text);")
+                           "greeting text);"
+                           )
 
         self.shell.execute("create table if not exists last_channel("
                            "guild_id integer not null primary key,"
@@ -62,6 +63,8 @@ class DatabaseProcessor:
     def _remove_row_last_channel(self, g_id):
         self.shell.execute("delete from last_channel where guild_id=?;",
                            (g_id,))
+
+        self.db.commit()
 
     def _set_greeting(self, guild_id, greeting_text):
         self.shell.execute("update guild_settings set greeting=? where guild_id=?;",

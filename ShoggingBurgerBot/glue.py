@@ -77,6 +77,11 @@ class Music(commands.Cog, name="Music"):
         await self.music.connect(ctx)
 
     @commands.guild_only()
+    @commands.command()
+    async def now_playing(self, ctx):
+        await self.music.now_playing(ctx)
+
+    @commands.guild_only()
     @commands.command(aliases=['p',])
     async def play(self, ctx, *, args=""):
         await self.music.play(ctx, args)
