@@ -47,6 +47,8 @@ class CustomPlayer(wavelink.Player):
             return await self.teardown()
 
         await self.play(track)
+        current_song[self.guild_id] = track
+        
         self.waiting = False
 
     async def teardown(self):
