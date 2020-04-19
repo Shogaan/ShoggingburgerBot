@@ -154,8 +154,11 @@ class MusicCommands:
         if not URL_TEMPL.match(query):
             if ctx.command.name == "soundcloud":
                 query=f"scsearch:{query}"
+                platform = "SoundCloud"
+
             else:
                 query = f"ytsearch:{query}"
+                platform = "YouTube"
 
         tracks = await self.bot.wavelink.get_tracks(f'{query}')
 
@@ -168,8 +171,8 @@ class MusicCommands:
 
             emb = BASIC_EMB.copy()
             emb.title = ":notes: Playlist added :notes:"
-            emb.description = tracks.data["playlistInfo"]["name"]
-            emb.url = query if URL_TEMPL.match(query) else None
+            emb.description = "[{}]({})".format(tracks.data["playlistInfo"]["name"],
+                                                query if URL_TEMPL.match(query) else None)
 
         else:
             track = tracks[0]
@@ -178,11 +181,10 @@ class MusicCommands:
 
             emb = BASIC_EMB.copy()
             emb.title = ":musical_note: Track added :musical_note:"
-            emb.description = track.title
-            emb.url = track.uri
+            emb.description = "[{}]({})".format(track.title, track.uri)
 
         emb.set_footer(
-            text="Requested by {}".format(ctx.author),
+            text="Requested by {} from {}".format(ctx.author, platform),
             icon_url=ctx.author.avatar_url
         )
 
