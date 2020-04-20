@@ -3,6 +3,7 @@ from discord import Embed
 from discord import Activity, ActivityType
 
 import os
+import re
 
 TOKEN = os.environ["DISCORD_TOKEN"]
 PREFIX = "//"
@@ -28,3 +29,7 @@ ACTIVITIES = [
         ]
 
 DEFAULT_VOLUME = 30
+
+URL_TEMPL = re.compile('https?:\/\/(?:www\.)?.+')
+YOUTUBE_URL = re.compile(r'https?:\/\/(?:www\.)?.+(youtube|youtu)')
+SOUNDCLOUD_URL = re.compile(r'https?:\/\/(?:www\.)?.+soundcloud')

@@ -1,7 +1,6 @@
 import asyncio
 import async_timeout
 import datetime
-import re
 import wavelink
 
 from discord.ext import commands
@@ -10,8 +9,7 @@ from typing import Dict, Union
 from db_logic import DatabaseProcessor
 from errors import NotInVoice, NoneTracksFound, IncorrectVolume
 from constants import BASIC_EMB, DEFAULT_VOLUME, ERROR_EMB
-
-URL_TEMPL = re.compile('https?:\/\/(?:www\.)?.+')
+from constants import URL_TEMPL, YOUTUBE_URL, SOUNDCLOUD_URL
 
 db_proc = DatabaseProcessor()
 
@@ -161,6 +159,16 @@ class MusicCommands:
             else:
                 query = f"ytsearch:{query}"
                 platform = "YouTube"
+
+        else:
+            if YOUTUBE_URL.match(query):
+                platform = "YouTube"
+
+            elif SOUNDCLOUD_URL.match(query):
+                platform = "Soundcloud"
+
+            else:
+                platform = "some platform"
 
         tracks = await self.bot.wavelink.get_tracks(f'{query}')
 
