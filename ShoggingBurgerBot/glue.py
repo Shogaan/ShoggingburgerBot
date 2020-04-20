@@ -44,9 +44,9 @@ class Guild(commands.Cog, name="Server"):
                       help='To set new greeting type:\n`{prefix}set_greeting -titile- main text`\nor\n'
                            '`{prefix}set_greeting -Title from several words- Greeting`'
                            '\nIn every part of your greeting you can type:'
-                           '```{user} - to refer to user\n'
-                           '{server} - to display server\'s name\n'
-                           '{prefix} - to display my prefix```\n'
+                           '```{{user}} - to refer to user\n'
+                           '{{server}} - to display server\'s name\n'
+                           '{{prefix}} - to display my prefix```\n'
                            '**You need to be an administrator!**'.format(prefix=PREFIX))
     async def set_greeting(self, ctx, *args):
         await GuildCommands(ctx).set_greeting_text(args)
