@@ -2,7 +2,6 @@ from constants import BASIC_EMB, PREFIX
 
 from db_logic import DatabaseProcessor
 
-import sqlite3
 
 class GuildEvents:
     async def on_bot_join(self, guild):
