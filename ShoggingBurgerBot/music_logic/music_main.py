@@ -4,22 +4,17 @@ import datetime
 import wavelink
 
 from discord.ext import commands
-from typing import Dict, Union
+from typing import Union
 
 from db_logic import DatabaseProcessor
 from errors import NotInVoice, NoneTracksFound, IncorrectVolume
 from constants import BASIC_EMB, DEFAULT_VOLUME, ERROR_EMB
 from constants import URL_TEMPL, YOUTUBE_URL, SOUNDCLOUD_URL
+from shog_types import CurrentSong, LastChannel
 
 db_proc = DatabaseProcessor()
-
-
-class CurrentSong(Dict):
-    guild_id: int
-    song: wavelink.Track
-
-
 current_song = CurrentSong()
+last_channel = LastChannel()
 
 
 class CustomPlayer(wavelink.Player):
@@ -51,6 +46,7 @@ class CustomPlayer(wavelink.Player):
 
     async def teardown(self):
         current_song.pop(self.guild_id)
+        last_channel.pop(self.guild_id)
 
         try:
             await self.destroy()
@@ -81,7 +77,7 @@ class MusicCommands:
         node.set_hook(self.node_event_hook)
 
     async def node_event_hook(self, event):
-        if isinstance(event, wavelink.TrackEnd):# (wavelink.TrackStuck, wavelink.TrackException, wavelink.TrackEnd)):
+        if isinstance(event, wavelink.TrackEnd):
             await event.player.do_next()
 
         elif isinstance(event, (wavelink.TrackException, wavelink.TrackStuck)):
@@ -89,7 +85,7 @@ class MusicCommands:
             track = event.track
             player = event.player
 
-            channel_id = db_proc._get_channel(player.guild_id)
+            channel_id = last_channel[player.guild_id]
             channel = self.bot.get_channel(channel_id)
 
             emb.title = "**ERROR!** Song couldn't be played!(Streams couldn't be played at all) Skipping..."
@@ -112,6 +108,9 @@ class MusicCommands:
     async def disconnect(self, ctx):
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
+
+        current_song.pop(ctx.guild.id)
+        last_channel.pop(ctx.guild.id)
 
         try:
             await player.destroy()
@@ -140,11 +139,7 @@ class MusicCommands:
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
 
-        if not db_proc._is_channel_in(ctx.guild.id):
-            db_proc._create_row_last_channel(ctx.guild.id, ctx.channel.id)
-
-        else:
-            db_proc._update_channel(ctx.guild.id, ctx.channel.id)
+        last_channel[ctx.guild.id] = ctx.channel.id
 
         if not player.is_connected:
             await self.connect(ctx)
