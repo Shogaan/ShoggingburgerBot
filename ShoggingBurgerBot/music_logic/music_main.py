@@ -5,6 +5,7 @@ import wavelink
 
 from discord.ext import commands
 from typing import Union
+from wavelink.errors import BuildTrackError
 
 from db_logic import DatabaseProcessor
 from errors import NotInVoice, NoneTracksFound, IncorrectVolume
@@ -81,17 +82,23 @@ class MusicCommands:
             await event.player.do_next()
 
         elif isinstance(event, (wavelink.TrackException, wavelink.TrackStuck)):
-            emb = ERROR_EMB.copy()
-            track = event.track
-            player = event.player
+            try:
+                track = await self.bot.wavelink.build_track(event.track)
 
-            channel_id = last_channel[player.guild_id]
-            channel = self.bot.get_channel(channel_id)
+            except BuildTrackError:
+                emb = ERROR_EMB.copy()
+                player = event.player
 
-            emb.title = "**ERROR!** Song couldn't be played!(Streams couldn't be played at all) Skipping..."
+                channel_id = last_channel[player.guild_id]
+                channel = self.bot.get_channel(channel_id)
 
-            await channel.send(embed=emb)
-            await player.stop()
+                emb.title = "**ERROR!** Song couldn't be played!(Streams couldn't be played at all) Skipping..."
+
+                await channel.send(embed=emb)
+                await player.stop()
+
+            else:
+                await event.player.play(track)
 
 
     async def connect(self, ctx):
