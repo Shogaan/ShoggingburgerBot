@@ -54,7 +54,7 @@ class Guild(commands.Cog, name="Server"):
 
 ## -------- Chat ------------
 class Chat(commands.Cog, name="Chat"):
-    @commands.command(aliases=['getlink, gl'],
+    @commands.command(aliases=['getlink', 'gl'],
                       help="Return link for inviting bot to another server")
     async def get_link(self, ctx):
         await ChatCommands(ctx).send_link()
