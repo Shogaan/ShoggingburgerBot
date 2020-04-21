@@ -18,7 +18,7 @@ HELP_EMB = Embed(colour=HELP_COLOUR)
 
 GREETING_TEMPLATE = "Welcome, {user}!;  We very glad to see you on our awsome server {server}!\nMy prefix is {prefix}."
 
-JOIN_LINK = "https://discordapp.com/oauth2/authorize?client_id={}&scope=bot&permissions=8"
+JOIN_LINK = "https://discordapp.com/oauth2/authorize?client_id={}&scope=bot&permissions=305294336"
 
 CAFE_LINK = "https://boosty.to/shoggingburger"
 PUB_LINK = "https://discord.gg/5SEM92b"
