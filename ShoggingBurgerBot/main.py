@@ -79,7 +79,7 @@ class Bot(commands.Bot):
         await self.guild_events.on_bot_leave(guild)
 
     async def on_member_join(self, member):
-        await self.guild_events.on_member_join(member, bot=self)
+        await self.guild_events.on_member_join(member)
     # ------- Guilds ----------
 
 

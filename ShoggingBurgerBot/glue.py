@@ -1,6 +1,7 @@
 import discord
 
 from discord.ext import commands
+from discord.errors import Forbidden
 
 from chat_logic.chat_commands import ChatCommands
 from guild_logic.guild_commands import GuildCommands
@@ -147,8 +148,13 @@ class System(commands.Cog, name="System"):
     async def shut_down(self, ctx):
         for guild in ctx.bot.guilds:
             channel = guild.system_channel if guild.system_channel else guild.text_channels[0]
-            await channel.send("@everyone! Bot will shut down in 2 minutes!",
+
+            try:
+                await channel.send("@everyone! Bot will shut down in 2 minutes!",
                                 delete_after=150)
+
+            except Forbidden:
+                continue
 
         await asyncio.sleep(120)
 
