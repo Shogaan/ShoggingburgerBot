@@ -54,14 +54,14 @@ class Bot(commands.Bot):
         print("Done")
         exit(0)
 
-    # async def on_command_error(self, ctx, err):
-    #     emb = ERROR_EMB.copy()
-    #
-    #     err = str(err) if str(err)[-1] != '.' else str(err)[:-1]
-    #
-    #     emb.title = "**ERROR!** " + err + "!"
-    #
-    #     await ctx.send(embed=emb)
+    async def on_command_error(self, ctx, err):
+        emb = ERROR_EMB.copy()
+
+        err = str(err) if str(err)[-1] != '.' else str(err)[:-1]
+
+        emb.title = "**ERROR!** " + err + "!"
+
+        await ctx.send(embed=emb)
 
     async def dynamic_activity(self):
         await self.wait_until_ready()
