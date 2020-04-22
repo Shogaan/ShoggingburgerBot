@@ -13,7 +13,7 @@ class ChatCommands:
         emb.title = "Welcome, {}!".format(self.ctx.author.display_name)
         emb.url= PUB_LINK
 
-        await self.ctx.delete(delay=2)
+        await self.ctx.message.delete(delay=2)
 
         await self.ctx.send(embed=emb)
 
