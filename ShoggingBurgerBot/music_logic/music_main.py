@@ -11,11 +11,12 @@ from db_logic import DatabaseProcessor
 from errors import NotInVoice, NoneTracksFound, IncorrectVolume
 from constants import BASIC_EMB, DEFAULT_VOLUME, ERROR_EMB
 from constants import URL_TEMPL, YOUTUBE_URL, SOUNDCLOUD_URL
-from shog_types import CurrentSong, LastChannel
 
 db_proc = DatabaseProcessor()
-current_song = CurrentSong()
-last_channel = LastChannel()
+
+current_song = {}
+last_channel = {}
+time_to_end = {}
 
 
 class CustomPlayer(wavelink.Player):
@@ -46,10 +47,10 @@ class CustomPlayer(wavelink.Player):
         self.waiting = False
 
     async def teardown(self):
-        current_song.pop(self.guild_id)
-        last_channel.pop(self.guild_id)
-
         try:
+            current_song.pop(self.guild_id)
+            last_channel.pop(self.guild_id)
+            time_to_end.pop(self.guild_id)
             await self.destroy()
 
         except KeyError:
@@ -64,6 +65,15 @@ class MusicCommands:
             self.bot.wavelink = wavelink.Client(self.bot)
 
         self.bot.loop.create_task(self.start_nodes())
+
+    @staticmethod
+    def get_humanize_time(time: int) -> str:
+        time = str(datetime.timedelta(milliseconds=time))
+        try:
+            tmp = time[7]
+            return time[:-7]
+        except IndexError:
+            return time
 
     async def start_nodes(self):
         await self.bot.wait_until_ready()
@@ -80,6 +90,11 @@ class MusicCommands:
     async def node_event_hook(self, event):
         if isinstance(event, wavelink.TrackEnd):
             await event.player.do_next()
+
+            tmp = await self.bot.wavelink.build_track(event.track)
+            time_to_end[event.player.guild_id] -= tmp.duration
+
+            del tmp
 
         elif isinstance(event, (wavelink.TrackException, wavelink.TrackStuck)):
             try:
@@ -108,6 +123,8 @@ class MusicCommands:
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
 
+        time_to_end[ctx.guild.id] = 0
+
         await player.set_volume(DEFAULT_VOLUME)
 
         await player.connect(ctx.author.voice.channel.id)
@@ -116,11 +133,12 @@ class MusicCommands:
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
 
-        current_song.pop(ctx.guild.id)
-        last_channel.pop(ctx.guild.id)
-
         try:
+            current_song.pop(ctx.guild.id)
+            last_channel.pop(ctx.guild.id)
+            time_to_end.pop(ctx.guild.id)
             await player.destroy()
+
         except KeyError:
             pass
 
@@ -135,7 +153,7 @@ class MusicCommands:
 
         emb = BASIC_EMB.copy()
         emb.title = ":musical_note: Now playing :musical_note:"
-        to_end = str(datetime.timedelta(milliseconds=int(track.length - player.position)))[:-7]
+        to_end = self.get_humanize_time(track.length - player.position)
         emb.description = "[{}]({})\nTo end {}".format(track.title, track.uri, to_end)
 
         await ctx.message.delete()
@@ -150,6 +168,11 @@ class MusicCommands:
 
         if not player.is_connected:
             await self.connect(ctx)
+
+        estimated_time = self.get_humanize_time(time_to_end[ctx.guild.id] - player.position)
+        estimated_time = estimated_time if estimated_time != "" else "00:00:00"
+
+        pos_in_queue = player.queue.qsize() + 1
 
         await ctx.message.delete(delay=2)
 
@@ -180,20 +203,32 @@ class MusicCommands:
         if isinstance(tracks, wavelink.TrackPlaylist):
             for track in tracks.tracks:
                 await player.queue.put(track)
+                time_to_end[ctx.guild.id] += track.duration
 
             emb = BASIC_EMB.copy()
             emb.title = ":notes: Playlist added :notes:"
             emb.description = "[{}]({})".format(tracks.data["playlistInfo"]["name"],
                                                 query if URL_TEMPL.match(query) else None)
 
+            emb.add_field(name="Songs", value=len(tracks.tracks))
+
         else:
             track = tracks[0]
+
+            if not track.is_stream:
+                time_to_end[ctx.guild.id] += track.duration
 
             await player.queue.put(track)
 
             emb = BASIC_EMB.copy()
             emb.title = ":musical_note: Track added :musical_note:"
             emb.description = "[{}]({})".format(track.title, track.uri)
+
+            emb.add_field(name="Duration", value=self.get_humanize_time(int(track.duration)))
+
+        emb.add_field(name="Position in queue", value=pos_in_queue)
+
+        emb.add_field(name="Estimated time until start", value=estimated_time)
 
         emb.set_footer(
             text="Requested by {} from {}".format(ctx.author, platform),
