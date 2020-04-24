@@ -4,11 +4,8 @@ from utils import to_column_string
 
 
 class ProfileCommands:
-    def __init__(self, ctx):
-        self.ctx = ctx
-
-    async def send_avatar(self):
-        user = self.ctx.message.mentions[0] if self.ctx.message.mentions else None
+    async def send_avatar(self, ctx):
+        user = ctx.message.mentions[0] if ctx.message.mentions else None
         emb = BASIC_EMB.copy()
 
         if user is None:
@@ -16,10 +13,10 @@ class ProfileCommands:
 
         emb.title = "Avatar of {0}".format(user.display_name)
         emb.set_image(url=user.avatar_url)
-        await self.ctx.send(embed=emb)
+        await ctx.send(embed=emb)
 
-    async def send_member_info(self):
-        user = self.ctx.message.mentions[0] if self.ctx.message.mentions else None
+    async def send_member_info(self, ctx):
+        user = ctx.message.mentions[0] if ctx.message.mentions else None
         emb = BASIC_EMB.copy()
 
         if user is None:
@@ -31,5 +28,4 @@ class ProfileCommands:
         emb.add_field(name="Roles", value=to_column_string(user.roles[::-1]))
         emb.add_field(name="Activity", value=to_column_string(user.activities) if user.activities else "User has no activity right now")
 
-        await self.ctx.send(embed=emb)
-
+        await ctx.send(embed=emb)

@@ -2,12 +2,11 @@ from constants import BASIC_EMB
 from db_logic import DatabaseProcessor
 from utils import to_column_string
 
-class GuildCommands:
-    def __init__(self, ctx):
-        self.ctx = ctx
 
-    async def send_guild_info(self):
-        guild = self.ctx.guild
+class GuildCommands:
+    async def send_guild_info(self, ctx):
+        guild = ctx.guild
+
         emb = BASIC_EMB.copy()
 
         emb.title = guild.name
@@ -19,11 +18,11 @@ class GuildCommands:
         emb.add_field(name="Text channels", value=to_column_string(guild.text_channels))
         emb.add_field(name="Voice channels", value=to_column_string(guild.voice_channels))
 
-        await self.ctx.message.delete(delay=2)
+        await ctx.message.delete(delay=2)
 
-        await self.ctx.send(embed=emb)
+        await ctx.send(embed=emb)
 
-    async def set_greeting_text(self, args):
+    async def set_greeting_text(self, ctx, args):
         title = ""
         description = ""
         is_title = True
@@ -48,11 +47,11 @@ class GuildCommands:
 
         description = description[:-1]
 
-        DatabaseProcessor()._set_greeting(self.ctx.guild.id, title + "; " + description)
+        DatabaseProcessor()._set_greeting(ctx.guild.id, title + "; " + description)
 
-        await self.ctx.message.delete(delay=3)
+        await ctx.message.delete(delay=3)
 
         emb = BASIC_EMB.copy()
         emb.title = "Done"
-        await self.ctx.send(embed=emb, delete_after=5)
+        await ctx.send(embed=emb, delete_after=5)
 

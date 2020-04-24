@@ -5,7 +5,6 @@ from discord.errors import Forbidden
 
 from chat_logic.chat_commands import ChatCommands
 from guild_logic.guild_commands import GuildCommands
-from guild_logic.guild_events import GuildEvents
 from music_logic.music_main import MusicCommands
 from profile_logic.profile_commands import ProfileCommands
 
@@ -19,25 +18,35 @@ import os
 
 ## -------- Profile ---------
 class Profile(commands.Cog, name="Profile"):
+    def __init__(self):
+        super().__init__()
+
+        self.profile = ProfileCommands()
+
     @commands.command(aliases=['av', 'ava',],
                       help="Return mentioned user's avatar")
     async def avatar(self, ctx):
-        await ProfileCommands(ctx).send_avatar()
+        await self.profile.send_avatar(ctx)
 
     @commands.guild_only()
     @commands.command(aliases=['mi', 'memberinfo', 'meminfo', 'mem_info'],
                       help="Return information about mentioned member")
     async def member_info(self, ctx):
-        await ProfileCommands(ctx).send_member_info()
+        await self.profile.send_member_info(ctx)
 ## -------- Profile ---------
 
 ## -------- Guild -----------
 class Guild(commands.Cog, name="Server"):
+    def __init__(self):
+        super().__init__()
+
+        self.guild = GuildCommands()
+
     @commands.guild_only()
     @commands.command(aliases=['serverinfo', 'guild_info', 'guildinfo', 'si', 'gi'],
                       help="Return information about current server")
     async def server_info(self, ctx):
-        await GuildCommands(ctx).send_guild_info()
+        await self.guild.send_guild_info(ctx)
 
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
@@ -50,25 +59,30 @@ class Guild(commands.Cog, name="Server"):
                            '{{prefix}} - to display my prefix```\n'
                            '**You need to be an administrator!**'.format(prefix=PREFIX))
     async def set_greeting(self, ctx, *args):
-        await GuildCommands(ctx).set_greeting_text(args)
+        await self.guild.set_greeting_text(ctx, args)
 ## -------- Guild -----------
 
 ## -------- Chat ------------
 class Chat(commands.Cog, name="Chat"):
+    def __init__(self):
+        super().__init__()
+
+        self.chat = ChatCommands()
+
     @commands.command(aliases=['getlink', 'gl'],
                       help="Return link for inviting bot to another server")
     async def get_link(self, ctx):
-        await ChatCommands(ctx).send_link()
+        await self.chat.send_link(ctx)
 
     @commands.command(aliases=['randomcat', 'rand_cat', 'randcat', 'rc'],
                       help="Return cute kitty")
     async def random_cat(self, ctx):
-        await ChatCommands(ctx).send_random_cat()
+        await self.chat.send_random_cat(ctx)
 
     @commands.command(aliases=['tp'],
                       help="Sending invite to lamp pub")
     async def to_pub(self, ctx):
-        await ChatCommands(ctx).send_invite()
+        await self.chat.send_invite(ctx)
 
 ## -------- Chat ------------
 
