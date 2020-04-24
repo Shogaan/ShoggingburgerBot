@@ -2,11 +2,10 @@ from constants import BASIC_EMB
 from errors import NoUserSpec
 from utils import to_column_string
 
+
 class ProfileCommands:
     def __init__(self, ctx):
         self.ctx = ctx
-
-        self.er_emb = ERROR_EMB
 
     async def send_avatar(self):
         user = self.ctx.message.mentions[0] if self.ctx.message.mentions else None

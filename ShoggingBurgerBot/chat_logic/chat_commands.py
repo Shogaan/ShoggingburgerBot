@@ -11,7 +11,7 @@ class ChatCommands:
     async def send_invite(self):
         emb = BASIC_EMB.copy()
         emb.title = "Welcome, {}!".format(self.ctx.author.display_name)
-        emb.url= PUB_LINK
+        emb.url = PUB_LINK
 
         await self.ctx.message.delete(delay=2)
 

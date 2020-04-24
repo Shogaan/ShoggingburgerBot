@@ -128,6 +128,7 @@ class Music(commands.Cog, name="Music"):
     async def leave(self, ctx):
         await self.music.disconnect(ctx)
 ## -------- Music -----------
+
 class System(commands.Cog, name="System"):
     def __init__(self, bot):
         super().__init__()
