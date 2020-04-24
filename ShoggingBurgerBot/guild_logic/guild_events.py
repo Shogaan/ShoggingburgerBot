@@ -1,6 +1,6 @@
 from discord.errors import Forbidden
 
-from constants import BASIC_EMB, PREFIX
+from constants import BASIC_EMB, PREFIX, PUB_ID
 
 from db_logic import DatabaseProcessor
 
@@ -21,11 +21,14 @@ class GuildEvents:
         emb.title = text[0].format(user=member.display_name, server=guild.name, prefix=PREFIX)
         emb.description = text[1].format(user=member.mention, server=guild.name, prefix=PREFIX)
 
-        if guild.id == 698939991891509258:
-            role = guild.get_role(698976288010010714)
+        if guild.id == PUB_ID:
+            role = guild.get_role(PUB_ID)
             await member.add_roles(role)
 
         try:
             await channel.send(embed=emb)
         except Forbidden:
             pass
+
+    async def check_donate_lvl(self, before, after):
+        pass

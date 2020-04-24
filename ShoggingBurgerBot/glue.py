@@ -14,6 +14,16 @@ from utils import close_database
 import asyncio
 import os
 
+# --------- Checks ----------
+
+def is_donator():
+    def predicate(ctx):
+        # TODO: Write this
+        return True
+    return commands.check(predicate)
+
+# --------- Checks ----------
+
 # --------- Commands --------
 
 ## -------- Profile ---------
@@ -33,6 +43,10 @@ class Profile(commands.Cog, name="Profile"):
                       help="Return information about mentioned member")
     async def member_info(self, ctx):
         await self.profile.send_member_info(ctx)
+
+    @commands.command(hidden=True)
+    async def user_donate_status(self, ctx):
+        await ctx.send("In the development")
 ## -------- Profile ---------
 
 ## -------- Guild -----------
@@ -48,6 +62,7 @@ class Guild(commands.Cog, name="Server"):
     async def server_info(self, ctx):
         await self.guild.send_guild_info(ctx)
 
+    @is_donator()
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     @commands.command(aliases=['setgreeting', 'setgreet', 'set_greet', 'sg'],
@@ -60,6 +75,11 @@ class Guild(commands.Cog, name="Server"):
                            '**You need to be an administrator!**'.format(prefix=PREFIX))
     async def set_greeting(self, ctx, *args):
         await self.guild.set_greeting_text(ctx, args)
+
+    @commands.guild_only()
+    @commands.command(hidden=True)
+    async def guild_donate_status(self, ctx):
+        await ctx.send("In the development")
 ## -------- Guild -----------
 
 ## -------- Chat ------------
@@ -147,6 +167,16 @@ class System(commands.Cog, name="System"):
     def __init__(self, bot):
         super().__init__()
         self.bot = bot
+
+    @commands.is_owner()
+    @commands.command(hidden=True)
+    async def add_donator_guild(self, ctx):
+        pass
+
+    @commands.is_owner()
+    @commands.command(hidden=True)
+    async def add_donator_user(self, ctx):
+        pass
 
     @commands.command(hidden=True)
     async def ping(self, ctx):

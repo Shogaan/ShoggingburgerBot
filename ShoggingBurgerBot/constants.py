@@ -21,7 +21,9 @@ GREETING_TEMPLATE = "Welcome, {user}!;  We very glad to see you on our awsome se
 JOIN_LINK = "https://discordapp.com/oauth2/authorize?client_id={}&scope=bot&permissions=305294336"
 
 CAFE_LINK = "https://boosty.to/shoggingburger"
+CAFE_LINK_INT = "https://www.patreon.com/shoggingburger"
 PUB_LINK = "https://discord.gg/5SEM92b"
+PUB_ID = 698939991891509258
 
 ACTIVITIES = [
         Activity(type=ActivityType.listening, name="your messages"),
@@ -35,3 +37,11 @@ DEFAULT_VOLUME = 30
 URL_TEMPL = re.compile('https?:\/\/(?:www\.)?.+')
 YOUTUBE_URL = re.compile(r'https?:\/\/(?:www\.)?.+(youtube|youtu)')
 SOUNDCLOUD_URL = re.compile(r'https?:\/\/(?:www\.)?.+soundcloud')
+
+DONATE_LVLS = {
+        'Waiter': 1,
+        'Barman': 2,
+        'Professional barman': 3,
+        'Cook': 4,
+        'Chief': 5
+}

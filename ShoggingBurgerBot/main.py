@@ -9,9 +9,10 @@ from glue import Profile, Guild, Chat, Music, System
 from help_command import HelpCommandCustom
 
 from db_logic import DatabaseProcessor
-from constants import TOKEN, PREFIX
 from constants import ACTIVITIES
 from constants import ERROR_EMB
+from constants import TOKEN, PREFIX
+from constants import PUB_ID
 from utils import close_database
 
 
@@ -80,6 +81,10 @@ class Bot(commands.Bot):
 
     async def on_member_join(self, member):
         await self.guild_events.on_member_join(member)
+
+    async def on_member_update(self, before, after):
+        if before.guild.id == PUB_ID:
+            await self.guild_events.check_donate_lvl(before, after)
     # ------- Guilds ----------
 
 

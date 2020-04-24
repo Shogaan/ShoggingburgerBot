@@ -13,6 +13,16 @@ class DatabaseProcessor:
                            "greeting text);"
                            )
 
+        self.shell.execute("create table if not exists donaters("
+                           "id integer not null primary key autoincrement,"
+                           "who varchar[7],"
+                           "id_who integer,"
+                           "unlimit bool,"
+                           "lvl tinyint,"
+                           "start date,"
+                           "end date);"
+                           )
+
         self.db.commit()
 
     def _create_row_guild_settings(self, guild_id):

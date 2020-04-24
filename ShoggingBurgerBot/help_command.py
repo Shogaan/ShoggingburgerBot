@@ -1,7 +1,7 @@
 from discord.ext.commands import HelpCommand
 
 from constants import HELP_EMB, PREFIX
-from constants import CAFE_LINK, PUB_LINK
+from constants import CAFE_LINK, CAFE_LINK_INT, PUB_LINK
 
 from utils import to_column_string
 
@@ -25,11 +25,12 @@ class HelpCommandCustom(HelpCommand):
                 emb.add_field(name=name, value=value)
 
             emb.set_footer(
-                    text=f"To see more information ablout command type {PREFIX}help",
+                    text=f"To see more information ablout command type {PREFIX}help [command]",
                     icon_url="https://i.imgur.com/83bdZJE.jpg")
 
             message = "We very glad to see you in pub!\n{}\n\n"\
-                      "If you want to support us, we wait for you in cafe\n{}".format(PUB_LINK, CAFE_LINK)
+                      "If you want to support us, we wait for you in cafe\n{} or {}".format(PUB_LINK, CAFE_LINK,
+                                                                                            CAFE_LINK_INT)
 
             await ctx.message.author.send(message, embed=emb)
 
