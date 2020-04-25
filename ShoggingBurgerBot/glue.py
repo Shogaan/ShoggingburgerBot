@@ -9,17 +9,34 @@ from music_logic.music_main import MusicCommands
 from profile_logic.profile_commands import ProfileCommands
 
 from constants import PREFIX
-from utils import close_database
+from constants import DEBUG, END_DAY
+from errors import NotDonator
+from db_logic import DatabaseProcessor
+from utils import close_database, parse_command_with_kwargs
+
+from datetime import date
 
 import asyncio
 import os
 
 # --------- Checks ----------
 
-def is_donator():
-    def predicate(ctx):
-        # TODO: Write this
-        return True
+def is_donator_or_owner():
+    async def predicate(ctx):
+        is_donator_guild = ctx.guild.id in DatabaseProcessor().get_donators_guilds()
+        is_donator_member = ctx.author.id in DatabaseProcessor().get_donators_members()
+
+        if (is_donator_guild or
+            is_donator_member or
+            date.today() <= END_DAY or
+            DEBUG or
+            await ctx.bot.is_owner(ctx.author)):
+
+            return True
+
+        else:
+            raise NotDonator()
+
     return commands.check(predicate)
 
 # --------- Checks ----------
@@ -62,7 +79,7 @@ class Guild(commands.Cog, name="Server"):
     async def server_info(self, ctx):
         await self.guild.send_guild_info(ctx)
 
-    @is_donator()
+    @is_donator_or_owner()
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     @commands.command(aliases=['setgreeting', 'setgreet', 'set_greet', 'sg'],
@@ -167,16 +184,92 @@ class System(commands.Cog, name="System"):
     def __init__(self, bot):
         super().__init__()
         self.bot = bot
+        self.db_proc = DatabaseProcessor()
 
     @commands.is_owner()
     @commands.command(hidden=True)
-    async def add_donator_guild(self, ctx):
-        pass
+    async def add_donator_guild(self, ctx, *args):
+        kwargs = parse_command_with_kwargs(args)
+
+        unlimit = kwargs.get('unlimit')
+        unlimit = unlimit if unlimit is not None else False
+
+        who = 'guild'
+        id = kwargs.get('id')
+        id = id if id is not None else ctx.guild.id
+
+        unlimit = False
+
+        lvl = None
+
+        self.db_proc.create_row_donators(who, id, unlimit, lvl)
+
+        if unlimit:
+            self.db_proc.set_donator_unlimit(id)
 
     @commands.is_owner()
     @commands.command(hidden=True)
-    async def add_donator_user(self, ctx):
-        pass
+    async def add_donator_user(self, ctx, *args):
+        if ctx.message.mentions:
+            start = len(ctx.message.mentions)
+            args = args[start:]
+
+        kwargs = parse_command_with_kwargs(args)
+
+        unlimit = kwargs.get('unlimit')
+        unlimit = unlimit if unlimit is not None else date.today() <= END_DAY
+
+        who = 'member'
+        id = kwargs.get('id')
+        id = id if id is not None else ctx.message.mentions[0].id
+
+        lvl = kwargs.get('lvl')
+        lvl = lvl if lvl is not None else 1
+
+        self.db_proc.create_row_donators(who, id, lvl)
+
+        if unlimit:
+            self.db_proc.set_donator_unlimit(id)
+
+    @commands.is_owner()
+    @commands.command(hidden=True)
+    async def set_donator_unlimit(self, ctx, *args):
+        if ctx.message.mentions:
+            id = ctx.message.mentions[0].id
+
+        else:
+            id = int(args[0])
+
+        self.db_proc.set_donator_unlimit(id)
+
+    @commands.is_owner()
+    @commands.command(hidden=True)
+    async def unset_donator_unlimit(self, ctx, *args):
+        if ctx.message.mentions:
+            id = ctx.message.mentions[0].id
+
+        else:
+            id = int(args[0])
+
+        self.db_proc.unset_donator_unlimit(id)
+
+    @commands.is_owner()
+    @commands.command(hidden=True)
+    async def remove_donator_guild(self, ctx, *args):
+        id = int(args[0]) if args else ctx.guild.id
+
+        self.db_proc.remove_row_donators(id)
+
+    @commands.is_owner()
+    @commands.command(hidden=True)
+    async def remove_donator_user(self, ctx, *args):
+        if ctx.message.mentions:
+            id = ctx.message.mentions[0].id
+
+        else:
+            id = int(args[0])
+
+        self.db_proc.remove_row_donators(id)
 
     @commands.command(hidden=True)
     async def ping(self, ctx):

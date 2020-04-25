@@ -13,16 +13,20 @@ class DatabaseProcessor:
                            "greeting text);"
                            )
 
-        self.shell.execute("create table if not exists donaters("
+        self.shell.execute("create table if not exists donators("
                            "id integer not null primary key autoincrement,"
                            "who varchar[7],"
                            "id_who integer,"
                            "unlimit bool,"
-                           "lvl tinyint,"
-                           "start date,"
-                           "end date);"
+                           "lvl tinyint);"
                            )
 
+        self.db.commit()
+
+    def create_row_donators(self, who, id, unlimit, lvl):
+        self.shell.execute("insert into donators(who, id_who, unlimit, lvl) "
+                           "values(?, ?, ?, ?);",
+                           (who, id, unlimit, lvl,))
         self.db.commit()
 
     def _create_row_guild_settings(self, guild_id):
@@ -42,12 +46,52 @@ class DatabaseProcessor:
 
         return self.shell.fetchall()
 
+    def get_donators_guilds(self):
+        self.shell.execute("select id_who from donators where who='guild'")
+
+        return [i[0] for i in self.shell.fetchall()]
+
+    def get_donators_members(self):
+        self.shell.execute("select id_who from donators where who='member'")
+
+        return [i[0] for i in self.shell.fetchall()]
+
+    def is_donator(self, id_who):
+        self.shell.execute("select id from donators where id_who=?;",
+                           (id_who,))
+        return self.shell.fetchone() is not None
+
+    def is_unlimit(self, id_who):
+        self.shell.execute("select unlimit from donators where id_who=?;",
+                           (id_who,))
+        return self.shell.fetchone()[0] == 1
+
+    def remove_row_donators(self, id_who):
+        self.shell.execute("delete from donators where id_who=?",
+                           (id_who,))
+        self.db.commit()
+
     def _remove_row_guild_settings(self, guild_id):
         self.shell.execute("delete from guild_settings where guild_id=?;",
                            (guild_id,))
         self.db.commit()
 
+    def set_donator_unlimit(self, id_who):
+        self.shell.execute("update donators set unlimit=true where id_who=?;",
+                           (id_who,))
+        self.db.commit()
+
+    def unset_donator_unlimit(self, id_who):
+        self.shell.execute("update donators set unlimit=false where id_who=?;",
+                           (id_who,))
+        self.db.commit()
+
     def _set_greeting(self, guild_id, greeting_text):
         self.shell.execute("update guild_settings set greeting=? where guild_id=?;",
                            (greeting_text, guild_id,))
+        self.db.commit()
+
+    def update_donator_lvl(self, id_who, lvl):
+        self.shell.execute("update donators set lvl=? where id_who=?;",
+                           (lvl, id_who,))
         self.db.commit()

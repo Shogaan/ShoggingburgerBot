@@ -2,8 +2,13 @@ from discord import Colour
 from discord import Embed
 from discord import Activity, ActivityType
 
+from datetime import date
+
 import os
 import re
+
+DEBUG = False
+END_DAY = date(2020, 6, 30)
 
 TOKEN = os.environ["DISCORD_TOKEN"]
 PREFIX = "//"
@@ -34,7 +39,7 @@ ACTIVITIES = [
 
 DEFAULT_VOLUME = 30
 
-URL_TEMPL = re.compile('https?:\/\/(?:www\.)?.+')
+URL_TEMPL = re.compile(r'https?:\/\/(?:www\.)?.+')
 YOUTUBE_URL = re.compile(r'https?:\/\/(?:www\.)?.+(youtube|youtu)')
 SOUNDCLOUD_URL = re.compile(r'https?:\/\/(?:www\.)?.+soundcloud')
 

@@ -2,6 +2,7 @@ from discord import Activity, ActivityType
 from discord.ext import commands
 
 import asyncio
+import sys
 
 from guild_logic.guild_events import GuildEvents
 from glue import Profile, Guild, Chat, Music, System
@@ -13,6 +14,7 @@ from constants import ACTIVITIES
 from constants import ERROR_EMB
 from constants import TOKEN, PREFIX
 from constants import PUB_ID
+from constants import DEBUG
 from utils import close_database
 
 
@@ -70,7 +72,7 @@ class Bot(commands.Bot):
         while True:
             for activity in ACTIVITIES:
                 await self.change_presence(activity=activity)
-                await asyncio.sleep(120)
+                await asyncio.sleep(240)
 
     # ------- Guilds ----------
     async def on_guild_join(self, guild):
@@ -83,10 +85,13 @@ class Bot(commands.Bot):
         await self.guild_events.on_member_join(member)
 
     async def on_member_update(self, before, after):
-        if before.guild.id == PUB_ID:
+        if not before.bot and (before.guild.id == PUB_ID or DEBUG):
             await self.guild_events.check_donate_lvl(before, after)
     # ------- Guilds ----------
 
 
-Bot().run(TOKEN)
+if __name__ == "__main__":
+    DEBUG = True if len(sys.argv) > 1 and sys.argv[1] == '-d' else False
+
+    Bot().run(TOKEN)
 
