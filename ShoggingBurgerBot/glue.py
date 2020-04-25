@@ -277,6 +277,20 @@ class System(commands.Cog, name="System"):
 
     @commands.is_owner()
     @commands.command(hidden=True)
+    async def send_message(self, ctx, *, message):
+        message_to_send = "@everyone" + message
+
+        for guild in ctx.bot.guilds:
+            channel = guild.system_channel if guild.system_channel is not None else guild.text_channels[0]
+
+            try:
+                await channel.send(message_to_send)
+
+            except Forbidden:
+                pass
+
+    @commands.is_owner()
+    @commands.command(hidden=True)
     async def shut_down_now(self, ctx):
         close_database()
         exit(0)
