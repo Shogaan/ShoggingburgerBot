@@ -5,6 +5,7 @@ import asyncio
 import sys
 
 from guild_logic.guild_events import GuildEvents
+from topgg_logic.topgg_main import TopGG
 from glue import Profile, Guild, Chat, Music, System
 
 from help_command import HelpCommandCustom
@@ -30,6 +31,9 @@ class Bot(commands.Bot):
         self.add_cog(Chat())
         self.add_cog(Music(self))
         self.add_cog(System(self))
+
+        if not DEBUG:
+            self.add_cog(TopGG(self))
 
     async def on_ready(self):
         db_p = DatabaseProcessor()

@@ -11,6 +11,7 @@ DEBUG = False
 END_DAY = date(2020, 6, 30)
 
 TOKEN = os.environ["DISCORD_TOKEN"]
+TOPGG_TOKEN = os.environ["TOPGG_TOKEN"]  # TODO: Don't forget add on Linux
 PREFIX = "//"
 
 BASIC_COLOUR = Colour.from_rgb(109, 237, 89)
