@@ -1,3 +1,4 @@
+from aiohttp.client_exceptions import ClientConnectionError
 from discord.errors import Forbidden
 
 from constants import BASIC_EMB, PREFIX, PUB_ID
@@ -33,7 +34,7 @@ class GuildEvents:
 
         try:
             await channel.send(embed=emb)
-        except Forbidden:
+        except (Forbidden, ClientConnectionError):
             pass
 
     async def check_donate_lvl(self, before, after):
