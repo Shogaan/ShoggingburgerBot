@@ -1,5 +1,6 @@
 from discord import Activity, ActivityType
 from discord.ext import commands
+from discord.errors import Forbidden
 
 import asyncio
 import sys
@@ -68,7 +69,12 @@ class Bot(commands.Bot):
 
         emb.title = "**ERROR!** " + err + "!"
 
-        await ctx.send(embed=emb)
+        try:
+            await ctx.send(embed=emb)
+
+        except Forbidden:
+            await ctx.author.send("Error occured! I can not send message in channel... So, here it is.",
+                                  embed=emb)
 
     async def dynamic_activity(self):
         await self.wait_until_ready()

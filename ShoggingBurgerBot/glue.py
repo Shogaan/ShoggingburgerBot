@@ -278,7 +278,7 @@ class System(commands.Cog, name="System"):
     @commands.is_owner()
     @commands.command(hidden=True)
     async def send_message(self, ctx, *, message):
-        message_to_send = "@everyone" + message
+        message_to_send = "@everyone " + message
 
         for guild in ctx.bot.guilds:
             channel = guild.system_channel if guild.system_channel is not None else guild.text_channels[0]
