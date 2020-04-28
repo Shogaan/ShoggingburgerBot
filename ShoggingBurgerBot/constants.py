@@ -42,7 +42,7 @@ DEFAULT_VOLUME = 30
 
 URL_TEMPL = re.compile(r'https?:\/\/(?:www\.)?.+')
 YOUTUBE_URL = re.compile(r'https?:\/\/(?:www\.)?.+(youtube|youtu)')
-SOUNDCLOUD_URL = re.compile(r'https?:\/\/(?:www\.)?.+soundcloud')
+SOUNDCLOUD_URL = re.compile(r'https?:\/\/soundcloud')
 
 DONATE_LVLS = {
         'Waiter': 1,

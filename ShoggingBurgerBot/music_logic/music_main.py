@@ -89,9 +89,10 @@ class MusicCommands:
 
     async def node_event_hook(self, event):
         if isinstance(event, wavelink.TrackEnd):
+            tmp = current_song[event.player.guild_id]
+
             await event.player.do_next()
 
-            tmp = await self.bot.wavelink.build_track(event.track)
             time_to_end[event.player.guild_id] -= tmp.duration
 
             del tmp
@@ -109,7 +110,13 @@ class MusicCommands:
 
                 emb.title = "**ERROR!** Song couldn't be played!(Streams couldn't be played at all) Skipping..."
 
-                await channel.send(embed=emb)
+                try:
+                    await ctx.send(embed=emb)
+
+                except Forbidden:
+                    await ctx.author.send("Error occured! I can not send message in channel... So, here it is.",
+                                          embed=emb)
+
                 await player.stop()
 
             else:
