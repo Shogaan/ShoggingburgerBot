@@ -30,6 +30,7 @@ CAFE_LINK = "https://boosty.to/shoggingburger"
 CAFE_LINK_INT = "https://www.patreon.com/shoggingburger"
 PUB_LINK = "https://discord.gg/5SEM92b"
 PUB_ID = 698939991891509258
+DEFAULT_ROLE_ID = 698976288010010714
 
 ACTIVITIES = [
         Activity(type=ActivityType.listening, name="your messages"),

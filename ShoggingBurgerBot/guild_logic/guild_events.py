@@ -1,7 +1,7 @@
 from aiohttp.client_exceptions import ClientConnectionError
 from discord.errors import Forbidden
 
-from constants import BASIC_EMB, PREFIX, PUB_ID
+from constants import BASIC_EMB, PREFIX, PUB_ID, DEFAULT_ROLE_ID
 from constants import DONATE_LVLS, END_DAY
 
 from db_logic import DatabaseProcessor
@@ -29,7 +29,7 @@ class GuildEvents:
         emb.description = text[1].format(user=member.mention, server=guild.name, prefix=PREFIX)
 
         if guild.id == PUB_ID:
-            role = guild.get_role(PUB_ID)
+            role = guild.get_role(DEFAULT_ROLE_ID)
             await member.add_roles(role)
 
         try:
