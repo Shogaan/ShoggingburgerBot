@@ -114,7 +114,7 @@ class MusicCommands:
                     await ctx.send(embed=emb)
 
                 except Forbidden:
-                    await ctx.author.send("Error occured! I can not send message in channel... So, here it is.",
+                    await ctx.author.send("Error occured! I couldn't send message in channel... So, here it is.",
                                           embed=emb)
 
                 await player.stop()
@@ -298,4 +298,3 @@ class MusicCommands:
         await ctx.send(embed=emb, delete_after=2)
 
         await player.set_volume(value)
-

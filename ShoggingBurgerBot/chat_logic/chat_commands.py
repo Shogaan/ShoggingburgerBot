@@ -20,7 +20,7 @@ class ChatCommands:
         await ctx.send(JOIN_LINK.format(ctx.bot.user.id))
 
     async def send_random_cat(self, ctx):
-        req = requests.get(url="http://aws.random.cat//meow")
+        req = requests.get(url="http://aws.random.cat//meow")  # TODO: to async
 
         emb = BASIC_EMB.copy()
         emb.title = ":smiley_cat: Here's your cat :smiley_cat:"

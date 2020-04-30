@@ -11,7 +11,7 @@ DEBUG = False
 END_DAY = date(2020, 6, 30)
 
 TOKEN = os.environ["DISCORD_TOKEN"]
-TOPGG_TOKEN = os.environ["TOPGG_TOKEN"]  # TODO: Don't forget add on Linux
+TOPGG_TOKEN = os.environ.get("TOPGG_TOKEN")  # TODO: Don't forget add on Linux
 PREFIX = "//"
 
 BASIC_COLOUR = Colour.from_rgb(109, 237, 89)
@@ -45,6 +45,7 @@ URL_TEMPL = re.compile(r'https?:\/\/(?:www\.)?.+')
 YOUTUBE_URL = re.compile(r'https?:\/\/(?:www\.)?.+(youtube|youtu)')
 SOUNDCLOUD_URL = re.compile(r'https?:\/\/soundcloud')
 
+DONATE_LINKS = ("https://boosty.to/shoggingburger", "https://www.patreon.com/shoggingburger")
 DONATE_LVLS = {
         'Waiter': 1,
         'Barman': 2,

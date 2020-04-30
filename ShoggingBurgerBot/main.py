@@ -7,7 +7,7 @@ import sys
 
 from guild_logic.guild_events import GuildEvents
 from topgg_logic.topgg_main import TopGG
-from glue import Profile, Guild, Chat, Music, System
+from glue import Chat, Donate, Guild, Music, Profile, Settings, System
 
 from help_command import HelpCommandCustom
 
@@ -27,10 +27,12 @@ class Bot(commands.Bot):
 
         self.guild_events = GuildEvents()
 
-        self.add_cog(Profile())
-        self.add_cog(Guild())
         self.add_cog(Chat())
+        self.add_cog(Donate())
         self.add_cog(Music(self))
+        self.add_cog(Profile())
+        self.add_cog(Guild())  # Because in help command it is "Server" 
+        self.add_cog(Settings())
         self.add_cog(System(self))
 
         if not DEBUG:
@@ -104,4 +106,3 @@ if __name__ == "__main__":
     DEBUG = True if len(sys.argv) > 1 and sys.argv[1] == '-d' else False
 
     Bot().run(TOKEN)
-

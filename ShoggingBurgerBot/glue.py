@@ -4,9 +4,11 @@ from discord.ext import commands
 from discord.errors import Forbidden
 
 from chat_logic.chat_commands import ChatCommands
+from donate_commands import DonateCommands
 from guild_logic.guild_commands import GuildCommands
 from music_logic.music_main import MusicCommands
 from profile_logic.profile_commands import ProfileCommands
+from settings_logic.settings_commands import SettingsCommands
 
 from constants import PREFIX
 from constants import DEBUG, END_DAY
@@ -43,62 +45,6 @@ def is_donator_or_owner():
 
 # --------- Commands --------
 
-## -------- Profile ---------
-class Profile(commands.Cog, name="Profile"):
-    def __init__(self):
-        super().__init__()
-
-        self.profile = ProfileCommands()
-
-    @commands.command(aliases=['av', 'ava',],
-                      help="Return mentioned user's avatar")
-    async def avatar(self, ctx):
-        await self.profile.send_avatar(ctx)
-
-    @commands.guild_only()
-    @commands.command(aliases=['mi', 'memberinfo', 'meminfo', 'mem_info'],
-                      help="Return information about mentioned member")
-    async def member_info(self, ctx):
-        await self.profile.send_member_info(ctx)
-
-    @commands.command(hidden=True)
-    async def user_donate_status(self, ctx):
-        await ctx.send("In the development")
-## -------- Profile ---------
-
-## -------- Guild -----------
-class Guild(commands.Cog, name="Server"):
-    def __init__(self):
-        super().__init__()
-
-        self.guild = GuildCommands()
-
-    @commands.guild_only()
-    @commands.command(aliases=['serverinfo', 'guild_info', 'guildinfo', 'si', 'gi'],
-                      help="Return information about current server")
-    async def server_info(self, ctx):
-        await self.guild.send_guild_info(ctx)
-
-    @is_donator_or_owner()
-    @commands.guild_only()
-    @commands.has_permissions(administrator=True)
-    @commands.command(aliases=['setgreeting', 'setgreet', 'set_greet', 'sg'],
-                      help='To set new greeting type:\n`{prefix}set_greeting -titile- main text`\nor\n'
-                           '`{prefix}set_greeting -Title from several words- Greeting`'
-                           '\nIn every part of your greeting you can type:'
-                           '```{{user}} - to refer to user\n'
-                           '{{server}} - to display server\'s name\n'
-                           '{{prefix}} - to display my prefix```\n'
-                           '**You need to be an administrator!**'.format(prefix=PREFIX))
-    async def set_greeting(self, ctx, *args):
-        await self.guild.set_greeting_text(ctx, args)
-
-    @commands.guild_only()
-    @commands.command(hidden=True)
-    async def guild_donate_status(self, ctx):
-        await ctx.send("In the development")
-## -------- Guild -----------
-
 ## -------- Chat ------------
 class Chat(commands.Cog, name="Chat"):
     def __init__(self):
@@ -122,6 +68,42 @@ class Chat(commands.Cog, name="Chat"):
         await self.chat.send_invite(ctx)
 
 ## -------- Chat ------------
+
+## -------- Donate ----------
+class Donate(commands.Cog, name="Donate"):
+    def __init__(self):
+        super().__init__()
+
+        self.donate_class = DonateCommands()
+
+    @commands.command(help="Send links for donation")
+    async def donate(self, ctx):
+        await self.donate_class.send_donate_link(ctx)
+
+    @commands.guild_only()
+    @commands.command(hidden=True)
+    async def guild_donate_status(self, ctx):
+        await ctx.send("In the development")
+
+    @commands.command(hidden=True)
+    async def user_donate_status(self, ctx):
+        await ctx.send("In the development")
+## -------- Donate ----------
+
+## -------- Guild -----------
+class Guild(commands.Cog, name="Server"):
+    def __init__(self):
+        super().__init__()
+
+        self.guild = GuildCommands()
+
+    @commands.guild_only()
+    @commands.command(aliases=['serverinfo', 'guild_info', 'guildinfo', 'si', 'gi'],
+                      help="Return information about current server")
+    async def server_info(self, ctx):
+        await self.guild.send_guild_info(ctx)
+        await self.guild.set_greeting_text(ctx, args)
+## -------- Guild -----------
 
 ## -------- Music -----------
 class Music(commands.Cog, name="Music"):
@@ -179,6 +161,49 @@ class Music(commands.Cog, name="Music"):
     async def leave(self, ctx):
         await self.music.disconnect(ctx)
 ## -------- Music -----------
+
+## -------- Profile ---------
+class Profile(commands.Cog, name="Profile"):
+    def __init__(self):
+        super().__init__()
+
+        self.profile = ProfileCommands()
+
+    @commands.command(aliases=['av', 'ava',],
+                      help="Return mentioned user's avatar")
+    async def avatar(self, ctx):
+        await self.profile.send_avatar(ctx)
+
+    @commands.guild_only()
+    @commands.command(aliases=['mi', 'memberinfo', 'meminfo', 'mem_info'],
+                      help="Return information about mentioned member")
+    async def member_info(self, ctx):
+        await self.profile.send_member_info(ctx)
+## -------- Profile ---------
+
+## -------- Settings --------
+class Settings(commands.Cog, name="Settings"):
+    def __init__(self):
+        super().__init__()
+
+        self.settings = SettingsCommands()
+
+    @is_donator_or_owner()
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    @commands.command(aliases=['setgreeting', 'setgreet', 'set_greet', 'sg'],
+                      help='To set new greeting type:\n`{prefix}set_greeting -titile- main text`\nor\n'
+                           '`{prefix}set_greeting -Title from several words- Greeting`'
+                           '\nIn every part of your greeting you can type:'
+                           '```{{user}} - to refer to user\n'
+                           '{{server}} - to display server\'s name\n'
+                           '{{prefix}} - to display my prefix```\n'
+                           '**You need to be an administrator!**'.format(prefix=PREFIX))
+    async def set_greeting(self, ctx, *args):
+        await self.guild.set_greeting_text(ctx, args)
+
+
+## -------- Settings --------
 
 class System(commands.Cog, name="System"):
     def __init__(self, bot):
@@ -313,4 +338,3 @@ class System(commands.Cog, name="System"):
         close_database()
         exit(0)
 # --------- Commands --------
-
