@@ -25,3 +25,14 @@ def parse_command_with_kwargs(args):
 def to_column_string(iter_object):
     return '\n'.join(list(map(lambda x: x.name, iter_object)))
 
+def to_column_string_help(commands):
+    string_to_return = ""
+
+    for command in commands:
+        if command.hidden:
+            continue
+
+        string_to_return += command.name + "\n"
+
+    return string_to_return
+

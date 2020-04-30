@@ -9,6 +9,7 @@ from guild_logic.guild_commands import GuildCommands
 from music_logic.music_main import MusicCommands
 from profile_logic.profile_commands import ProfileCommands
 from settings_logic.settings_commands import SettingsCommands
+from system_logic.system_commands import SystemCommands
 
 from constants import PREFIX
 from constants import DEBUG, END_DAY
@@ -211,108 +212,46 @@ class System(commands.Cog, name="System"):
         self.bot = bot
         self.db_proc = DatabaseProcessor()
 
+        self.system = SystemCommands()
+
     @commands.is_owner()
     @commands.command(hidden=True)
     async def add_donator_guild(self, ctx, *args):
-        kwargs = parse_command_with_kwargs(args)
-
-        unlimit = kwargs.get('unlimit')
-        unlimit = unlimit if unlimit is not None else False
-
-        who = 'guild'
-        id = kwargs.get('id')
-        id = id if id is not None else ctx.guild.id
-
-        unlimit = False
-
-        lvl = None
-
-        self.db_proc.create_row_donators(who, id, unlimit, lvl)
-
-        if unlimit:
-            self.db_proc.set_donator_unlimit(id)
+        await self.system.add_don_guild(ctx, args)
 
     @commands.is_owner()
     @commands.command(hidden=True)
     async def add_donator_user(self, ctx, *args):
-        if ctx.message.mentions:
-            start = len(ctx.message.mentions)
-            args = args[start:]
-
-        kwargs = parse_command_with_kwargs(args)
-
-        unlimit = kwargs.get('unlimit')
-        unlimit = unlimit if unlimit is not None else date.today() <= END_DAY
-
-        who = 'member'
-        id = kwargs.get('id')
-        id = id if id is not None else ctx.message.mentions[0].id
-
-        lvl = kwargs.get('lvl')
-        lvl = lvl if lvl is not None else 1
-
-        self.db_proc.create_row_donators(who, id, lvl)
-
-        if unlimit:
-            self.db_proc.set_donator_unlimit(id)
+        await self.system.add_don_user(ctx, args)
 
     @commands.is_owner()
     @commands.command(hidden=True)
     async def set_donator_unlimit(self, ctx, *args):
-        if ctx.message.mentions:
-            id = ctx.message.mentions[0].id
-
-        else:
-            id = int(args[0])
-
-        self.db_proc.set_donator_unlimit(id)
+        await self,system.set_don_unlimit(ctx, args)
 
     @commands.is_owner()
     @commands.command(hidden=True)
     async def unset_donator_unlimit(self, ctx, *args):
-        if ctx.message.mentions:
-            id = ctx.message.mentions[0].id
-
-        else:
-            id = int(args[0])
-
-        self.db_proc.unset_donator_unlimit(id)
+        await self.system.unset_don_unlimit(ctx, args)
 
     @commands.is_owner()
     @commands.command(hidden=True)
     async def remove_donator_guild(self, ctx, *args):
-        id = int(args[0]) if args else ctx.guild.id
-
-        self.db_proc.remove_row_donators(id)
+        await self.system.remove_don_guild(ctx, args)
 
     @commands.is_owner()
     @commands.command(hidden=True)
     async def remove_donator_user(self, ctx, *args):
-        if ctx.message.mentions:
-            id = ctx.message.mentions[0].id
+        await self.system.remove_don_user(ctx, args)
 
-        else:
-            id = int(args[0])
-
-        self.db_proc.remove_row_donators(id)
-
-    @commands.command(hidden=True)
+    @commands.command()
     async def ping(self, ctx):
         await ctx.send(str(round(self.bot.latency * 10 ** 3)) + "ms")
 
     @commands.is_owner()
     @commands.command(hidden=True)
     async def send_message(self, ctx, *, message):
-        message_to_send = "@everyone " + message
-
-        for guild in ctx.bot.guilds:
-            channel = guild.system_channel if guild.system_channel is not None else guild.text_channels[0]
-
-            try:
-                await channel.send(message_to_send)
-
-            except Forbidden:
-                pass
+        await self.system.send_message(ctx, message)
 
     @commands.is_owner()
     @commands.command(hidden=True)

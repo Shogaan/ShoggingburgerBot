@@ -3,7 +3,7 @@ from discord.ext.commands import HelpCommand
 from constants import HELP_EMB, PREFIX
 from constants import CAFE_LINK, CAFE_LINK_INT, PUB_LINK
 
-from utils import to_column_string
+from utils import to_column_string_help
 
 
 class HelpCommandCustom(HelpCommand):
@@ -17,11 +17,11 @@ class HelpCommandCustom(HelpCommand):
             emb.title = f"Hi, {ctx.message.author.name}! It's a help command. The prefix is '//'"
             cogs = self.get_bot_mapping()
             for cog in cogs:
-                if cog is None or cog.qualified_name == "System":
-                    continue
+                if cog is None:
+                   continue
 
                 name = cog.qualified_name
-                value = to_column_string(cogs[cog])
+                value = to_column_string_help(cogs[cog])
                 emb.add_field(name=name, value=value)
 
             emb.set_footer(
