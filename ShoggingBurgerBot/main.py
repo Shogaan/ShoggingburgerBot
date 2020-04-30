@@ -2,6 +2,8 @@ from discord import Activity, ActivityType
 from discord.ext import commands
 from discord.errors import Forbidden
 
+from websockets.exceptions import ConnectionClosedError
+
 import asyncio
 import sys
 
@@ -83,7 +85,12 @@ class Bot(commands.Bot):
 
         while True:
             for activity in ACTIVITIES:
-                await self.change_presence(activity=activity)
+                try:
+                    await self.change_presence(activity=activity)
+
+                except ConnectionClosedError:
+                    pass
+
                 await asyncio.sleep(240)
 
     # ------- Guilds ----------
