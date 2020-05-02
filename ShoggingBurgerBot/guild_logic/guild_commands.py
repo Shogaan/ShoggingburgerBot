@@ -1,3 +1,4 @@
+from constants import BASIC_EMB
 from utils import to_column_string
 
 

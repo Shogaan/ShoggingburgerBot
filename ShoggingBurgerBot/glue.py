@@ -103,7 +103,6 @@ class Guild(commands.Cog, name="Server"):
                       help="Return information about current server")
     async def server_info(self, ctx):
         await self.guild.send_guild_info(ctx)
-        await self.guild.set_greeting_text(ctx, args)
 ## -------- Guild -----------
 
 ## -------- Music -----------
@@ -201,7 +200,7 @@ class Settings(commands.Cog, name="Settings"):
                            '{{prefix}} - to display my prefix```\n'
                            '**You need to be an administrator!**'.format(prefix=PREFIX))
     async def set_greeting(self, ctx, *args):
-        await self.guild.set_greeting_text(ctx, args)
+        await self.settings.set_greeting_text(ctx, args)
 
 
 ## -------- Settings --------
