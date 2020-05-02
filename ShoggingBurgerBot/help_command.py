@@ -17,7 +17,7 @@ class HelpCommandCustom(HelpCommand):
             emb.title = f"Hi, {ctx.message.author.name}! It's a help command. The prefix is '//'"
             cogs = self.get_bot_mapping()
             for cog in cogs:
-                if cog is None:
+                if cog is None or cog.qualified_name == "TopGG":
                    continue
 
                 name = cog.qualified_name

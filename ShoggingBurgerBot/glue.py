@@ -244,7 +244,7 @@ class System(commands.Cog, name="System"):
     async def remove_donator_user(self, ctx, *args):
         await self.system.remove_don_user(ctx, args)
 
-    @commands.command()
+    @commands.command(hidden=False)
     async def ping(self, ctx):
         await ctx.send(str(round(self.bot.latency * 10 ** 3)) + "ms")
 
@@ -267,7 +267,7 @@ class System(commands.Cog, name="System"):
 
             try:
                 await channel.send("@everyone! Bot will shut down in 2 minutes!",
-                                delete_after=150)
+                                delete_after=119)
 
             except Forbidden:
                 continue

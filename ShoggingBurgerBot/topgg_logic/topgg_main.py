@@ -7,7 +7,7 @@ from constants import TOPGG_TOKEN
 from datetime import datetime
 
 
-class TopGG(commands.Cog, name="System"):
+class TopGG(commands.Cog, name="TopGG"):
     def __init__(self, bot):
         self.bot = bot
 
