@@ -257,7 +257,7 @@ class System(commands.Cog, name="System"):
     @commands.command(hidden=True)
     async def shut_down_now(self, ctx):
         close_database()
-        exit(0)
+        await ctx.bot.shut_down()
 
     @commands.is_owner()
     @commands.command(hidden=True)
@@ -275,5 +275,5 @@ class System(commands.Cog, name="System"):
         await asyncio.sleep(120)
 
         close_database()
-        exit(0)
+        await ctx.bot.shut_down()
 # --------- Commands --------

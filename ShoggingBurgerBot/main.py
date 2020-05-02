@@ -93,6 +93,12 @@ class Bot(commands.Bot):
 
                 await asyncio.sleep(240)
 
+    async def shut_down(self):
+        if not DEBUG:
+            await self.cogs['TopGG'].dblpy.close()
+
+        exit(0)
+
     # ------- Guilds ----------
     async def on_guild_join(self, guild):
         await self.guild_events.on_bot_join(guild)
