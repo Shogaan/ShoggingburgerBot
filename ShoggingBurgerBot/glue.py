@@ -144,7 +144,7 @@ class Music(commands.Cog, name="Music"):
         await self.music.pause_resume(ctx)
 
     @commands.guild_only()
-    @commands.command(aliases=['sk',],
+    @commands.command(aliases=['sk', 's'],
                       help="Skip playing song")
     async def skip(self, ctx):
         await self.music.skip(ctx)
