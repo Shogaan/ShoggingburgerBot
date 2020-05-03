@@ -5,6 +5,7 @@ from discord.errors import Forbidden
 from websockets.exceptions import ConnectionClosedError
 
 import asyncio
+import logging
 import sys
 
 from guild_logic.guild_events import GuildEvents
@@ -26,6 +27,12 @@ class Bot(commands.Bot):
     def __init__(self):
         super(Bot, self).__init__(command_prefix=PREFIX, help_command=HelpCommandCustom())
         self.activity = Activity(name="Starting", type=ActivityType.playing)
+
+        self.logger = logging.getLogger('discord')
+        handler = logging.FileHandler(filename='bot.log', encoding='utf-8')
+        handler.setFormatter(logging.Formatter("%(asctime)s : %(message)s"))
+
+        self.logger.addHandler(handler)
 
         self.guild_events = GuildEvents()
 
@@ -65,6 +72,9 @@ class Bot(commands.Bot):
         close_database()
         print("Done")
         exit(0)
+
+    async def on_error(self, event, *args, **kwargs):
+        self.logger.exception(event)
 
     async def on_command_error(self, ctx, err):
         emb = ERROR_EMB.copy()
