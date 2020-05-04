@@ -29,6 +29,7 @@ class Bot(commands.Bot):
         self.activity = Activity(name="Starting", type=ActivityType.playing)
 
         self.logger = logging.getLogger('discord')
+        self.logger.setLevel(logging.ERROR)
         handler = logging.FileHandler(filename='bot.log', encoding='utf-8')
         handler.setFormatter(logging.Formatter("%(asctime)s : %(message)s"))
 
