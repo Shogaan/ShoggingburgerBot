@@ -8,15 +8,14 @@ from typing import Union
 from wavelink.errors import BuildTrackError
 
 from db_logic import DatabaseProcessor
-from errors import NotInVoice, NoneTracksFound, IncorrectVolume, StreamsNotPlayable
+from custom_types import InfoForMusic
 from constants import BASIC_EMB, DEFAULT_VOLUME, ERROR_EMB
 from constants import URL_TEMPL, YOUTUBE_URL, SOUNDCLOUD_URL
+from errors import NotInVoice, NoneTracksFound, IncorrectVolume, StreamsNotPlayable
 
 db_proc = DatabaseProcessor()
 
-current_song = {}
-last_channel = {}
-time_to_end = {}
+info_for_music = InfoForMusic()
 
 
 class CustomPlayer(wavelink.Player):
@@ -42,15 +41,13 @@ class CustomPlayer(wavelink.Player):
             return await self.teardown()
 
         await self.play(track)
-        current_song[self.guild_id] = track
+        info_for_music[self.guild_id]["song"] = track
         
         self.waiting = False
 
     async def teardown(self):
         try:
-            current_song.pop(self.guild_id)
-            last_channel.pop(self.guild_id)
-            time_to_end.pop(self.guild_id)
+            info_for_music.pop(self.guild_id)
             await self.destroy()
 
         except KeyError:
@@ -87,19 +84,20 @@ class MusicCommands:
                                                      identifier='TEST',
                                                      region='eu_central')
 
-        try:
-            node.set_hook(self.node_event_hook)
-
-        except Exception as e:
-            self.bot.logger.exception(e)
+        node.set_hook(self.node_event_hook)
 
     async def node_event_hook(self, event):
         if isinstance(event, wavelink.TrackEnd):
-            tmp = current_song[event.player.guild_id]
+            g_id = event.player.guild_id
+            tmp = info_for_music[g_id]["song"]
 
             await event.player.do_next()
 
-            time_to_end[event.player.guild_id] -= tmp.duration
+            try:
+                info_for_music[g_id]["time"] -= tmp.duration
+
+            except Exception as e:
+                self.bot.logger.exception(e)
 
             del tmp
 
@@ -111,7 +109,7 @@ class MusicCommands:
                 emb = ERROR_EMB.copy()
                 player = event.player
 
-                channel_id = last_channel[player.guild_id]
+                channel_id = info_for_music[player.guild_id]["channel"]
                 channel = self.bot.get_channel(channel_id)
 
                 emb.title = "**ERROR!** Song couldn't be played!(Streams couldn't be played at all) Skipping..."
@@ -135,7 +133,7 @@ class MusicCommands:
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
 
-        time_to_end[ctx.guild.id] = 0
+        info_for_music[ctx.guild.id] = None
 
         await player.set_volume(DEFAULT_VOLUME)
 
@@ -146,9 +144,7 @@ class MusicCommands:
                                               cls=CustomPlayer)
 
         try:
-            current_song.pop(ctx.guild.id)
-            last_channel.pop(ctx.guild.id)
-            time_to_end.pop(ctx.guild.id)
+            info_for_music.pop(ctx.guild.id)
             await player.destroy()
 
         except KeyError:
@@ -158,10 +154,10 @@ class MusicCommands:
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
 
-        if not (player.is_connected or player.is_playing):
+        if not player.is_connected:
             return
 
-        track = current_song[ctx.guild.id]
+        track = info_for_music[ctx.guild.id]["song"]
 
         emb = BASIC_EMB.copy()
         emb.title = ":musical_note: Now playing :musical_note:"
@@ -175,12 +171,12 @@ class MusicCommands:
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
 
-        last_channel[ctx.guild.id] = ctx.channel.id
-
         if not player.is_connected:
             await self.connect(ctx)
 
-        estimated_time = self.get_humanize_time(time_to_end[ctx.guild.id] - player.position)
+        info_for_music[ctx.guild.id]["channel"] = ctx.channel.id
+
+        estimated_time = self.get_humanize_time(info_for_music[ctx.guild.id]["time"] - player.position)
         estimated_time = estimated_time if estimated_time != "" else "00:00:00"
 
         pos_in_queue = player.queue.qsize() + 1  # TODO Make it more properly. When playing - 1, when no - 0
@@ -189,7 +185,7 @@ class MusicCommands:
 
         if not URL_TEMPL.match(query):
             if ctx.command.name == "soundcloud":
-                query=f"scsearch:{query}"
+                query = f"scsearch:{query}"
                 platform = "SoundCloud"
 
             else:
@@ -214,7 +210,7 @@ class MusicCommands:
         if isinstance(tracks, wavelink.TrackPlaylist):
             for track in tracks.tracks:
                 await player.queue.put(track)
-                time_to_end[ctx.guild.id] += track.duration
+                info_for_music[ctx.guild.id]["time"] += track.duration
 
             emb = BASIC_EMB.copy()
             emb.title = ":notes: Playlist added :notes:"
@@ -227,7 +223,7 @@ class MusicCommands:
             track = tracks[0]
 
             if not track.is_stream:
-                time_to_end[ctx.guild.id] += track.duration
+                info_for_music[ctx.guild.id]["time"] += track.duration
 
             else:
                 raise StreamsNotPlayable()
@@ -259,7 +255,7 @@ class MusicCommands:
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
 
-        if not (player.is_connected or player.is_playing):
+        if not player.is_connected:
             return
 
         await ctx.message.delete(delay=2)
@@ -280,7 +276,7 @@ class MusicCommands:
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
 
-        if not (player.is_connected or player.is_playing):
+        if not player.is_connected:
             return
 
         await ctx.message.delete(delay=2)
