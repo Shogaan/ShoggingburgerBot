@@ -85,7 +85,11 @@ class MusicCommands:
                                                      identifier='TEST',
                                                      region='eu_central')
 
-        node.set_hook(self.node_event_hook)
+        try:
+            node.set_hook(self.node_event_hook)
+
+        except Exception as e:
+            self.bot.logger.exception(e)
 
     async def node_event_hook(self, event):
         if isinstance(event, wavelink.TrackEnd):
