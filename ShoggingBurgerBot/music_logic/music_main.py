@@ -3,12 +3,12 @@ import async_timeout
 import datetime
 import wavelink
 
-from discord.ext import commands
+from discord.errors import Forbidden
 from typing import Union
 from wavelink.errors import BuildTrackError
 
 from db_logic import DatabaseProcessor
-from errors import NotInVoice, NoneTracksFound, IncorrectVolume
+from errors import NotInVoice, NoneTracksFound, IncorrectVolume, StreamsNotPlayable
 from constants import BASIC_EMB, DEFAULT_VOLUME, ERROR_EMB
 from constants import URL_TEMPL, YOUTUBE_URL, SOUNDCLOUD_URL
 
@@ -69,11 +69,13 @@ class MusicCommands:
     @staticmethod
     def get_humanize_time(time: int) -> str:
         time = str(datetime.timedelta(milliseconds=time))
-        try:
-            tmp = time[7]
-            return time[:-7]
-        except IndexError:
-            return time
+        if len(time) > 7:
+            index = time.rfind('.')
+
+        else:
+            index = -1
+
+        return time[:-index] if index != -1 else time
 
     async def start_nodes(self):
         await self.bot.wait_until_ready()
@@ -115,17 +117,16 @@ class MusicCommands:
                 emb.title = "**ERROR!** Song couldn't be played!(Streams couldn't be played at all) Skipping..."
 
                 try:
-                    await ctx.send(embed=emb)
+                    await channel.send(embed=emb)
 
                 except Forbidden:
-                    await ctx.author.send("Error occured! I couldn't send message in channel... So, here it is.",
-                                          embed=emb)
+                    await channel.author.send("Error occured! I couldn't send message in channel... So, here it is.",
+                                              embed=emb)
 
                 await player.stop()
 
             else:
                 await event.player.play(track)
-
 
     async def connect(self, ctx):
         if not ctx.author.voice:
@@ -157,7 +158,7 @@ class MusicCommands:
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
 
-        if not player.is_connected:
+        if not (player.is_connected or player.is_playing):
             return
 
         track = current_song[ctx.guild.id]
@@ -169,7 +170,6 @@ class MusicCommands:
 
         await ctx.message.delete()
         await ctx.send(embed=emb, delete_after=5)
-
 
     async def play(self, ctx, query):
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
@@ -183,7 +183,7 @@ class MusicCommands:
         estimated_time = self.get_humanize_time(time_to_end[ctx.guild.id] - player.position)
         estimated_time = estimated_time if estimated_time != "" else "00:00:00"
 
-        pos_in_queue = player.queue.qsize() + 1
+        pos_in_queue = player.queue.qsize() + 1  # TODO Make it more properly. When playing - 1, when no - 0
 
         await ctx.message.delete(delay=2)
 
@@ -229,13 +229,17 @@ class MusicCommands:
             if not track.is_stream:
                 time_to_end[ctx.guild.id] += track.duration
 
+            else:
+                raise StreamsNotPlayable()
+
             await player.queue.put(track)
 
             emb = BASIC_EMB.copy()
             emb.title = ":musical_note: Track added :musical_note:"
             emb.description = "[{}]({})".format(track.title, track.uri)
 
-            emb.add_field(name="Duration", value=self.get_humanize_time(int(track.duration)))
+            emb.add_field(name="Duration",
+                          value=self.get_humanize_time(int(track.duration)))
 
         emb.add_field(name="Position in queue", value=pos_in_queue)
 
@@ -255,7 +259,7 @@ class MusicCommands:
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
 
-        if not player.is_connected:
+        if not (player.is_connected or player.is_playing):
             return
 
         await ctx.message.delete(delay=2)
@@ -276,7 +280,7 @@ class MusicCommands:
         player = self.bot.wavelink.get_player(guild_id=ctx.guild.id,
                                               cls=CustomPlayer)
 
-        if not player.is_connected:
+        if not (player.is_connected or player.is_playing):
             return
 
         await ctx.message.delete(delay=2)

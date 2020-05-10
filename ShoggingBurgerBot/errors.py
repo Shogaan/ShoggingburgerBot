@@ -25,3 +25,7 @@ class IncorrectVolume(CommandError):
     def __str__(self):
         return "Minimum volume is 1, maximum - 100"
 
+
+class StreamsNotPlayable(CommandError):
+    def __str__(self):
+        return "Streams couldn't be played"
