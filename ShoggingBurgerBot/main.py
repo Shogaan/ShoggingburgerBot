@@ -88,8 +88,11 @@ class Bot(commands.Bot):
             await ctx.send(embed=emb)
 
         except Forbidden:
-            await ctx.author.send("Error occured! I can not send message in channel... So, here it is.",
-                                  embed=emb)
+            try:
+                await ctx.author.send("Error occured! I can not send message in channel... So, here it is.",
+                                      embed=emb)
+            except Forbidden:
+                self.logger.exception("Unable to send err msg" + err)
 
     async def dynamic_activity(self):
         await self.wait_until_ready()
