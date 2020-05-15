@@ -17,7 +17,7 @@ from help_command import HelpCommandCustom
 from db_logic import DatabaseProcessor
 from constants import ACTIVITIES
 from constants import ERROR_EMB
-from constants import TOKEN, PREFIX
+from constants import TOKEN, PREFIX, IGNORED_GUILDS
 from constants import PUB_ID
 from constants import DEBUG
 from utils import close_database
@@ -88,6 +88,9 @@ class Bot(commands.Bot):
             await ctx.send(embed=emb)
 
         except Forbidden:
+            if ctx.guild.id in IGNORED_GUILDS:
+                return
+
             try:
                 await ctx.author.send("Error occured! I can not send message in channel... So, here it is.",
                                       embed=emb)

@@ -13,6 +13,7 @@ END_DAY = date(2020, 6, 30)
 TOKEN = os.environ["DISCORD_TOKEN"]
 TOPGG_TOKEN = os.environ.get("TOPGG_TOKEN")  # TODO: Don't forget add on Linux
 PREFIX = "//"
+IGNORED_GUILDS = [264445053596991498,]
 
 BASIC_COLOUR = Colour.from_rgb(109, 237, 89)
 ERROR_COLOUR = Colour.from_rgb(255, 0, 0)
