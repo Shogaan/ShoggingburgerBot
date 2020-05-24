@@ -3,6 +3,9 @@ from db_logic import DatabaseProcessor
 
 
 class SettingsCommands:
+    def __init__(self):
+        self.db_proc = DatabaseProcessor()
+
     async def set_greeting_text(self, ctx, args):
         title = ""
         description = ""
@@ -28,11 +31,23 @@ class SettingsCommands:
 
             description = description[:-1]
 
-            DatabaseProcessor()._set_greeting(ctx.guild.id, title + "; " + description)
+            self.db_proc()._set_greeting(ctx.guild.id, title + "; " + description)
 
             await ctx.message.delete(delay=3)
 
             emb = BASIC_EMB.copy()
             emb.title = "Done"
             await ctx.send(embed=emb, delete_after=5)
+
+    async def toggle_greeting_notification(self, ctx):
+        """ Turn on or turn off greeting message """
+
+        guild_id = ctx.guild.id
+
+        if self.db_proc.get_enabled_greeting(guild_id):
+            is_enabled = False
+        else:
+            is_enabled = True
+
+        self.db_proc.toggle_enabled_greeting(guild_id, is_enabled)
 

@@ -102,7 +102,7 @@ class Guild(commands.Cog, name="Server"):
     @commands.command(aliases=['serverinfo', 'guild_info', 'guildinfo', 'si', 'gi'],
                       help="Return information about current server")
     async def server_info(self, ctx):
-        await self.guild.send_guild_info(ctx)
+        await self.guild.send_guild_info(ctx) # TODO: Add info about greeting and donate status
 ## -------- Guild -----------
 
 ## -------- Music -----------
@@ -202,6 +202,12 @@ class Settings(commands.Cog, name="Settings"):
     async def set_greeting(self, ctx, *args):
         await self.settings.set_greeting_text(ctx, args)
 
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    @commands.command(aliases=["tg", "togglegreeting"],
+                     help="Turn on/off greeting message")
+    async def toggle_greeting(self, ctx):
+        await self.settings.toggle_greeting_notification(ctx)
 
 ## -------- Settings --------
 

@@ -42,7 +42,7 @@ class CustomPlayer(wavelink.Player):
 
         await self.play(track)
         info_for_music[self.guild_id]["song"] = track
-        
+
         self.waiting = False
 
     async def teardown(self):
@@ -88,20 +88,21 @@ class MusicCommands:
 
     async def node_event_hook(self, event):
         if isinstance(event, wavelink.TrackEnd):
-            g_id = event.player.guild_id
-            tmp = info_for_music[g_id]["song"]
+            try:
+                info_for_music[event.player.guild_id]["time"] -= info_for_music[event.player.guild_id]["song"].duration
+
+            except Exceprtion as e:
+                self.bot.logger.exception(e)
 
             await event.player.do_next()
 
+        elif isinstance(event, (wavelink.TrackException, wavelink.TrackStuck)):
             try:
-                info_for_music[g_id]["time"] -= tmp.duration
+                info_for_music[event.player.guild_id]["time"] -= info_for_music[event.player.guild_id]["song"].duration
 
-            except Exception as e:
+            except Exceprtion as e:
                 self.bot.logger.exception(e)
 
-            del tmp
-
-        elif isinstance(event, (wavelink.TrackException, wavelink.TrackStuck)):
             try:
                 track = await self.bot.wavelink.build_track(event.track)
 
@@ -157,12 +158,16 @@ class MusicCommands:
         if not player.is_connected:
             return
 
-        track = info_for_music[ctx.guild.id]["song"]
+        track = player.current
 
         emb = BASIC_EMB.copy()
-        emb.title = ":musical_note: Now playing :musical_note:"
-        to_end = self.get_humanize_time(track.length - player.position)
-        emb.description = "[{}]({})\nTo end {}".format(track.title, track.uri, to_end)
+        if track is not None:
+            emb.title = ":musical_note: Now playing :musical_note:"
+            to_end = self.get_humanize_time(track.length - player.position)
+            emb.description = "[{}]({})\nTo end {}".format(track.title, track.uri, to_end)
+
+        else:
+            emb.title = "Nothing playing"
 
         await ctx.message.delete()
         await ctx.send(embed=emb, delete_after=5)
@@ -176,7 +181,8 @@ class MusicCommands:
 
         info_for_music[ctx.guild.id]["channel"] = ctx.channel.id
 
-        estimated_time = self.get_humanize_time(info_for_music[ctx.guild.id]["time"] - player.position)
+        estimated_time = self.get_humanize_time(
+                info_for_music[ctx.guild.id]["time"] - player.position)
         estimated_time = estimated_time if estimated_time != "" else "00:00:00"
 
         pos_in_queue = player.queue.qsize() + 1  # TODO Make it more properly. When playing - 1, when no - 0

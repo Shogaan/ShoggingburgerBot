@@ -10,7 +10,8 @@ class DatabaseProcessor:
 
         self.shell.execute("create table if not exists guild_settings("
                            "guild_id integer not null primary key,"
-                           "greeting text);"
+                           "greeting text,"
+                           "enabled_greeting bool);"
                            )
 
         self.shell.execute("create table if not exists donators("
@@ -30,10 +31,16 @@ class DatabaseProcessor:
         self.db.commit()
 
     def _create_row_guild_settings(self, guild_id):
-        self.shell.execute("insert into guild_settings(guild_id, greeting) "
-                           "values(?, ?);",
+        self.shell.execute("insert into guild_settings(guild_id, greeting, enabled_greeting) "
+                           "values(?, ?, true);",
                            (guild_id, GREETING_TEMPLATE,))
         self.db.commit()
+
+    def get_enabled_greeting(self, guild_id):
+        self.shell.execute("select enabled_greeting from guild_settings where guild_id=?;",
+                           (guild_id,))
+
+        return self.shell.fetchone()[0]
 
     def _get_greeting(self, guild_id):
         self.shell.execute("select greeting from guild_settings where guild_id=?;",
@@ -74,6 +81,12 @@ class DatabaseProcessor:
     def _remove_row_guild_settings(self, guild_id):
         self.shell.execute("delete from guild_settings where guild_id=?;",
                            (guild_id,))
+        self.db.commit()
+
+    def toggle_enabled_greeting(self, guild_id, is_enabled):
+        self.shell.execute("update guild_settings set enabled_greeting=? where guild_id=?;",
+                           (is_enabled, guild_id,))
+
         self.db.commit()
 
     def set_donator_unlimit(self, id_who):
