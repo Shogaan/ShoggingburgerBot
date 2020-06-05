@@ -32,8 +32,8 @@ class DatabaseProcessor:
 
     def _create_row_guild_settings(self, guild_id):
         self.shell.execute("insert into guild_settings(guild_id, greeting, enabled_greeting) "
-                           "values(?, ?, true);",
-                           (guild_id, GREETING_TEMPLATE,))
+                           "values(?, ?, ?);",
+                           (guild_id, GREETING_TEMPLATE, True,))
         self.db.commit()
 
     def get_enabled_greeting(self, guild_id):
