@@ -33,7 +33,8 @@ class GuildEvents:
             await member.add_roles(role)
 
         try:
-            await channel.send(embed=emb)
+            if self.db_proc.is_greeting_enabled(guild.id):
+                await channel.send(embed=emb)
         except (Forbidden, ClientConnectionError):
             pass
 

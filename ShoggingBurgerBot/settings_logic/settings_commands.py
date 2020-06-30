@@ -44,10 +44,14 @@ class SettingsCommands:
 
         guild_id = ctx.guild.id
 
-        if self.db_proc.get_enabled_greeting(guild_id):
+        if self.db_proc.is_greeting_enabled(guild_id):
             is_enabled = False
         else:
             is_enabled = True
 
         self.db_proc.toggle_enabled_greeting(guild_id, is_enabled)
+
+        message = f"Greeting is turned {'on' if is_enabled else 'off'}"
+
+        await ctx.send(message)
 

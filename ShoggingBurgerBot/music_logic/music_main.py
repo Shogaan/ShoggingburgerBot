@@ -203,7 +203,7 @@ class MusicCommands:
                 platform = "YouTube"
 
             elif SOUNDCLOUD_URL.match(query):
-                platform = "Soundcloud"
+                platform = "SoundCloud"
 
             else:
                 platform = "some platform"

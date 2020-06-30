@@ -36,7 +36,7 @@ class DatabaseProcessor:
                            (guild_id, GREETING_TEMPLATE, True,))
         self.db.commit()
 
-    def get_enabled_greeting(self, guild_id):
+    def is_greeting_enabled(self, guild_id):
         self.shell.execute("select enabled_greeting from guild_settings where guild_id=?;",
                            (guild_id,))
 

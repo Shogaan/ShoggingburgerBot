@@ -1,5 +1,6 @@
 __pycache__/
 .gitignore
+.idea
 run_server
 logs/
 global.db
