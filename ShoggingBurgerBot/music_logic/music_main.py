@@ -91,7 +91,7 @@ class MusicCommands:
             try:
                 info_for_music[event.player.guild_id]["time"] -= info_for_music[event.player.guild_id]["song"].duration
 
-            except Exceprtion as e:
+            except Exception as e:
                 self.bot.logger.exception(e)
 
             await event.player.do_next()
