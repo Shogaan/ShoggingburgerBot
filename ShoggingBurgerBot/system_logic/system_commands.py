@@ -1,7 +1,9 @@
 from discord.errors import Forbidden
 
+from constants import HELP_EMB
+
 from db_logic import DatabaseProcessor
-from utils import parse_command_with_kwargs
+from utils import parse_command_with_kwargs, to_column_string
 
 
 class SystemCommands:
@@ -48,6 +50,14 @@ class SystemCommands:
 
         if unlimit:
             self.db_proc.set_donator_unlimit(id)
+
+    async def send_private_help(self, ctx, commands):
+        emb = HELP_EMB.copy()
+
+        emb.title = "Private help"
+        emb.description = to_column_string(commands)
+
+        await ctx.message.author.send(embed=emb)
 
     async def set_don_unlimit(self, ctx, args):
         if ctx.message.mentions:

@@ -255,6 +255,14 @@ class System(commands.Cog, name="System"):
 
     @commands.is_owner()
     @commands.command(hidden=True)
+    async def private_help(self, ctx):
+        await self.system.send_private_help(
+                                            ctx=ctx,
+                                            commands=self.get_commands()
+                                           )
+
+    @commands.is_owner()
+    @commands.command(hidden=True)
     async def send_message(self, ctx, *, message):
         await self.system.send_message(ctx, message)
 
