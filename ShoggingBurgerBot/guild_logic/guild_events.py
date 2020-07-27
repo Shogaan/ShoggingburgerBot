@@ -14,15 +14,15 @@ class GuildEvents:
         self.db_proc = DatabaseProcessor()
 
     async def on_bot_join(self, guild):
-        self.db_proc._create_row_guild_settings(guild.id)
+        self.db_proc.create_row_guild_settings(guild.id)
 
     async def on_bot_leave(self, guild):
-        self.db_proc._remove_row_guild_settings(guild.id)
+        self.db_proc.remove_row_guild_settings(guild.id)
 
     async def on_member_join(self, member):
         guild = member.guild
         channel = guild.system_channel if guild.system_channel is not None else guild.text_channels[0]
-        text = self.db_proc._get_greeting(guild.id).split("; ")
+        text = self.db_proc.get_greeting(guild.id).split("; ")
 
         emb = BASIC_EMB.copy()
         emb.title = text[0].format(user=member.display_name, server=guild.name, prefix=PREFIX)

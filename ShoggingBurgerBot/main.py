@@ -41,7 +41,7 @@ class Bot(commands.Bot):
         self.add_cog(Donate())
         self.add_cog(Music(self))
         self.add_cog(Profile())
-        self.add_cog(Guild())  # Because in help command it is "Server" 
+        self.add_cog(Guild())  # Guild() in this row because in help command it is "Server" 
         self.add_cog(Settings())
         self.add_cog(System(self))
 
@@ -52,17 +52,17 @@ class Bot(commands.Bot):
         db_p = DatabaseProcessor()
 
         guilds = [i.id for i in self.guilds]
-        wr_guilds = [i[0] for i in db_p._get_guilds()]
+        wr_guilds = [i[0] for i in db_p.get_guilds()]
 
         for guild in guilds:
             if not guild in wr_guilds:
-                db_p._create_row_guild_settings(guild)
+                db_p.create_row_guild_settings(guild)
 
-        wr_guilds = [i[0] for i in db_p._get_guilds()]
+        wr_guilds = [i[0] for i in db_p.get_guilds()]
 
         for guild in wr_guilds:
             if guild not in guilds:
-                db_p._remove_row_guild_settings(guild)
+                db_p.remove_row_guild_settings(guild)
 
         self.loop.create_task(self.dynamic_activity())
 
@@ -114,7 +114,7 @@ class Bot(commands.Bot):
         if not DEBUG:
             await self.cogs['TopGG'].dblpy.close()
 
-        exit(0)
+        exit()
 
     # ------- Guilds ----------
     async def on_guild_join(self, guild):

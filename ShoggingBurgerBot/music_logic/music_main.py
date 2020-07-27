@@ -7,13 +7,10 @@ from discord.errors import Forbidden
 from typing import Union
 from wavelink.errors import BuildTrackError
 
-from db_logic import DatabaseProcessor
 from custom_types import InfoForMusic
 from constants import BASIC_EMB, DEFAULT_VOLUME, ERROR_EMB
 from constants import URL_TEMPL, YOUTUBE_URL, SOUNDCLOUD_URL
 from errors import NotInVoice, NoneTracksFound, IncorrectVolume, StreamsNotPlayable
-
-db_proc = DatabaseProcessor()
 
 info_for_music = InfoForMusic()
 
@@ -64,7 +61,7 @@ class MusicCommands:
         self.bot.loop.create_task(self.start_nodes())
 
     @staticmethod
-    def get_humanize_time(time: int) -> str:
+    def _get_humanize_time(time: int) -> str:
         time = str(datetime.timedelta(milliseconds=time))
         if len(time) > 7:
             index = time.rfind('.')
@@ -163,7 +160,7 @@ class MusicCommands:
         emb = BASIC_EMB.copy()
         if track is not None:
             emb.title = ":musical_note: Now playing :musical_note:"
-            to_end = self.get_humanize_time(track.length - player.position)
+            to_end = self._get_humanize_time(track.length - player.position)
             emb.description = "[{}]({})\nTo end {}".format(track.title, track.uri, to_end)
 
         else:
@@ -181,7 +178,7 @@ class MusicCommands:
 
         info_for_music[ctx.guild.id]["channel"] = ctx.channel.id
 
-        estimated_time = self.get_humanize_time(
+        estimated_time = self._get_humanize_time(
                 info_for_music[ctx.guild.id]["time"] - player.position)
         estimated_time = estimated_time if estimated_time != "" else "00:00:00"
 
@@ -241,7 +238,7 @@ class MusicCommands:
             emb.description = "[{}]({})".format(track.title, track.uri)
 
             emb.add_field(name="Duration",
-                          value=self.get_humanize_time(int(track.duration)))
+                          value=self._get_humanize_time(int(track.duration)))
 
         emb.add_field(name="Position in queue", value=pos_in_queue)
 

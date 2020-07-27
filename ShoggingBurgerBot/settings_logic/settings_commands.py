@@ -31,7 +31,7 @@ class SettingsCommands:
 
             description = description[:-1]
 
-            self.db_proc()._set_greeting(ctx.guild.id, title + "; " + description)
+            self.db_proc().set_greeting(ctx.guild.id, title + "; " + description)
 
             await ctx.message.delete(delay=3)
 

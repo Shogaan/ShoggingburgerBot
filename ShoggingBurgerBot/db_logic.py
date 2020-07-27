@@ -30,7 +30,7 @@ class DatabaseProcessor:
                            (who, id, unlimit, lvl,))
         self.db.commit()
 
-    def _create_row_guild_settings(self, guild_id):
+    def create_row_guild_settings(self, guild_id):
         self.shell.execute("insert into guild_settings(guild_id, greeting, enabled_greeting) "
                            "values(?, ?, ?);",
                            (guild_id, GREETING_TEMPLATE, True,))
@@ -42,13 +42,13 @@ class DatabaseProcessor:
 
         return self.shell.fetchone()[0]
 
-    def _get_greeting(self, guild_id):
+    def get_greeting(self, guild_id):
         self.shell.execute("select greeting from guild_settings where guild_id=?;",
                            (guild_id,))
 
         return self.shell.fetchone()[0]
 
-    def _get_guilds(self):
+    def get_guilds(self):
         self.shell.execute("select guild_id from guild_settings;")
 
         return self.shell.fetchall()
@@ -78,7 +78,7 @@ class DatabaseProcessor:
                            (id_who,))
         self.db.commit()
 
-    def _remove_row_guild_settings(self, guild_id):
+    def remove_row_guild_settings(self, guild_id):
         self.shell.execute("delete from guild_settings where guild_id=?;",
                            (guild_id,))
         self.db.commit()
@@ -99,7 +99,7 @@ class DatabaseProcessor:
                            (id_who,))
         self.db.commit()
 
-    def _set_greeting(self, guild_id, greeting_text):
+    def set_greeting(self, guild_id, greeting_text):
         self.shell.execute("update guild_settings set greeting=? where guild_id=?;",
                            (greeting_text, guild_id,))
         self.db.commit()

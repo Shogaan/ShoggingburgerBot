@@ -85,7 +85,7 @@ class SystemCommands:
         message_to_send = "@everyone " + message
 
         for guild in ctx.bot.guilds:
-            channel = guild.system_channel if guild.system_channel is not None else guild.     text_channels[0]
+            channel = guild.system_channel if guild.system_channel is not None else guild.text_channels[0]
 
             try:
                 await channel.send(message_to_send)
